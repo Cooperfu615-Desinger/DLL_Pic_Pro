@@ -194,6 +194,20 @@
                                     </svg>
                                 </button>
                             </div>
+
+                            <!-- Aspect Ratio Selector -->
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">圖片比例</label>
+                                <select id="aspectRatio"
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm">
+                                    <option value="16:9" selected>16:9 (Landscape - 電腦桌布)</option>
+                                    <option value="9:16">9:16 (Portrait - 手機桌布)</option>
+                                    <option value="1:1">1:1 (Square - 頭像)</option>
+                                    <option value="4:3">4:3 (Standard)</option>
+                                    <option value="3:4">3:4 (Portrait Standard)</option>
+                                </select>
+                            </div>
+
                             <div class="flex items-center justify-between mt-4">
                                 <p class="text-xs text-gray-500">💡 描述越詳細，效果越好</p>
                                 <button id="generateBtn"
@@ -367,6 +381,7 @@
 
             promptInput: document.getElementById('promptInput'),
             clearPromptBtn: document.getElementById('clearPromptBtn'),
+            aspectRatioSelect: document.getElementById('aspectRatio'),
             generateBtn: document.getElementById('generateBtn'),
 
             dropZone: document.getElementById('dropZone'),
@@ -517,6 +532,9 @@
             elements.resultImage.classList.add('hidden');
             elements.downloadBtn.classList.add('hidden');
 
+            // Get selected aspect ratio
+            const selectedRatio = elements.aspectRatioSelect.value;
+
             try {
                 // Use Gemini 2.5 Flash with image generation
                 const response = await fetch(
@@ -529,7 +547,9 @@
                                 parts: [{ text: `Generate an image: ${prompt}` }]
                             }],
                             generationConfig: {
-                                responseModalities: ["TEXT", "IMAGE"]
+                                responseModalities: ["TEXT", "IMAGE"],
+                                aspectRatio: selectedRatio,
+                                responseMimeType: "image/jpeg"
                             }
                         })
                     }
