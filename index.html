@@ -208,6 +208,18 @@
                                 </select>
                             </div>
 
+                            <!-- Image Count Selector -->
+                            <div class="mt-4">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">生成張數</label>
+                                <select id="imageCount"
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm">
+                                    <option value="1" selected>1 張</option>
+                                    <option value="2">2 張</option>
+                                    <option value="3">3 張</option>
+                                    <option value="4">4 張</option>
+                                </select>
+                            </div>
+
                             <div class="flex items-center justify-between mt-4">
                                 <p class="text-xs text-gray-500">💡 描述越詳細，效果越好</p>
                                 <button id="generateBtn"
@@ -296,36 +308,41 @@
                                         d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                 </svg>
                                 預覽區
+                                <span id="imageCountBadge"
+                                    class="hidden text-xs bg-purple-600 px-2 py-0.5 rounded-full">0 張</span>
                             </h3>
-                            <button id="downloadBtn"
+                            <button id="downloadAllBtn"
                                 class="flex items-center gap-2 text-sm bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition-colors hidden">
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                         d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                 </svg>
-                                下載圖片
+                                全部下載
                             </button>
                         </div>
 
                         <!-- Preview Content -->
-                        <div id="previewContent" class="flex-1 flex items-center justify-center p-6">
+                        <div id="previewContent" class="flex-1 p-4 overflow-auto">
                             <!-- Placeholder (shown when no image) -->
-                            <div id="previewPlaceholder" class="text-center">
-                                <div
-                                    class="w-32 h-32 mx-auto mb-4 rounded-2xl placeholder-pattern flex items-center justify-center">
-                                    <svg class="w-16 h-16 text-gray-600" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
+                            <div id="previewPlaceholder" class="h-full flex items-center justify-center">
+                                <div class="text-center">
+                                    <div
+                                        class="w-32 h-32 mx-auto mb-4 rounded-2xl placeholder-pattern flex items-center justify-center">
+                                        <svg class="w-16 h-16 text-gray-600" fill="none" stroke="currentColor"
+                                            viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                                d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                    </div>
+                                    <p class="text-gray-500 text-lg mb-1">尚未生成圖片</p>
+                                    <p class="text-gray-600 text-sm">輸入 Prompt 並點擊「生成圖像」開始</p>
                                 </div>
-                                <p class="text-gray-500 text-lg mb-1">尚未生成圖片</p>
-                                <p class="text-gray-600 text-sm">輸入 Prompt 並點擊「生成圖像」開始</p>
                             </div>
 
-                            <!-- Generated Image -->
-                            <img id="resultImage"
-                                class="hidden max-w-full max-h-[calc(100vh-240px)] rounded-xl shadow-2xl image-preview transition-transform duration-200 w-full object-contain">
+                            <!-- Image Grid Container -->
+                            <div id="imageGrid" class="hidden grid gap-4">
+                                <!-- Images will be dynamically inserted here -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -363,7 +380,7 @@
             apiKey: localStorage.getItem('dll_pic_pro_api_key') || '',
             model: localStorage.getItem('dll_pic_pro_model') || 'google',
             uploadedImage: null,
-            generatedImage: null
+            generatedImages: [] // Changed from single image to array
         };
 
         // ==================== DOM Elements ====================
@@ -382,6 +399,7 @@
             promptInput: document.getElementById('promptInput'),
             clearPromptBtn: document.getElementById('clearPromptBtn'),
             aspectRatioSelect: document.getElementById('aspectRatio'),
+            imageCountSelect: document.getElementById('imageCount'),
             generateBtn: document.getElementById('generateBtn'),
 
             dropZone: document.getElementById('dropZone'),
@@ -397,8 +415,9 @@
             loadingState: document.getElementById('loadingState'),
             loadingText: document.getElementById('loadingText'),
             previewPlaceholder: document.getElementById('previewPlaceholder'),
-            resultImage: document.getElementById('resultImage'),
-            downloadBtn: document.getElementById('downloadBtn'),
+            imageGrid: document.getElementById('imageGrid'),
+            imageCountBadge: document.getElementById('imageCountBadge'),
+            downloadAllBtn: document.getElementById('downloadAllBtn'),
 
             errorToast: document.getElementById('errorToast'),
             errorMessage: document.getElementById('errorMessage'),
@@ -455,7 +474,7 @@
             elements.usePromptBtn.addEventListener('click', useAnalyzedPrompt);
 
             // Download
-            elements.downloadBtn.addEventListener('click', downloadImage);
+            elements.downloadAllBtn.addEventListener('click', downloadAllImages);
         }
 
         // ==================== Settings ====================
@@ -526,54 +545,67 @@
                 return;
             }
 
-            showLoading('正在生成圖像...');
-            // Hide placeholder, keep result image hidden during loading
-            elements.previewPlaceholder.classList.add('hidden');
-            elements.resultImage.classList.add('hidden');
-            elements.downloadBtn.classList.add('hidden');
-
-            // Get selected aspect ratio
+            // Get selected options
             const selectedRatio = elements.aspectRatioSelect.value;
+            const imageCount = parseInt(elements.imageCountSelect.value);
+
+            showLoading(`正在生成 ${imageCount} 張圖像...`);
+
+            // Hide placeholder and clear previous images
+            elements.previewPlaceholder.classList.add('hidden');
+            elements.imageGrid.classList.add('hidden');
+            elements.imageGrid.innerHTML = '';
+            elements.downloadAllBtn.classList.add('hidden');
+            elements.imageCountBadge.classList.add('hidden');
+            state.generatedImages = [];
 
             try {
-                // Use Gemini 2.5 Flash with image generation
-                const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${state.apiKey}`,
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [{ text: `Generate an image: ${prompt}` }]
-                            }],
-                            generationConfig: {
-                                responseModalities: ["TEXT", "IMAGE"],
-                                aspectRatio: selectedRatio,
-                                responseMimeType: "image/jpeg"
-                            }
-                        })
-                    }
+                // Create array of fetch promises for parallel requests
+                const fetchPromises = Array.from({ length: imageCount }, () =>
+                    fetch(
+                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${state.apiKey}`,
+                        {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({
+                                contents: [{
+                                    parts: [{ text: `Generate an image: ${prompt}` }]
+                                }],
+                                generationConfig: {
+                                    responseModalities: ["TEXT", "IMAGE"],
+                                    aspectRatio: selectedRatio,
+                                    responseMimeType: "image/jpeg"
+                                }
+                            })
+                        }
+                    )
                 );
 
-                if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || `API 請求失敗 (${response.status})`);
+                // Wait for all requests to complete
+                const responses = await Promise.all(fetchPromises);
+
+                // Process all responses
+                for (let i = 0; i < responses.length; i++) {
+                    const response = responses[i];
+                    if (!response.ok) {
+                        console.error(`Request ${i + 1} failed`);
+                        continue;
+                    }
+
+                    const data = await response.json();
+                    const parts = data.candidates?.[0]?.content?.parts || [];
+                    const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
+
+                    if (imagePart) {
+                        const base64Data = imagePart.inlineData.data;
+                        const mimeType = imagePart.inlineData.mimeType;
+                        state.generatedImages.push(`data:${mimeType};base64,${base64Data}`);
+                    }
                 }
 
-                const data = await response.json();
-
-                // Extract image from response
-                const parts = data.candidates?.[0]?.content?.parts || [];
-                const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
-
-                if (imagePart) {
-                    const base64Data = imagePart.inlineData.data;
-                    const mimeType = imagePart.inlineData.mimeType;
-                    state.generatedImage = `data:${mimeType};base64,${base64Data}`;
-                    elements.resultImage.src = state.generatedImage;
-                    elements.resultImage.classList.remove('hidden');
-                    elements.downloadBtn.classList.remove('hidden');
-                    showSuccess('圖像生成成功！');
+                if (state.generatedImages.length > 0) {
+                    renderImageGrid();
+                    showSuccess(`成功生成 ${state.generatedImages.length} 張圖像！`);
                 } else {
                     throw new Error('API 回應中未包含圖像數據');
                 }
@@ -584,6 +616,51 @@
             } finally {
                 hideLoading();
             }
+        }
+
+        // ==================== Render Image Grid ====================
+        function renderImageGrid() {
+            const count = state.generatedImages.length;
+
+            // Set grid columns based on image count
+            if (count === 1) {
+                elements.imageGrid.className = 'grid gap-4 grid-cols-1';
+            } else {
+                elements.imageGrid.className = 'grid gap-4 grid-cols-1 sm:grid-cols-2';
+            }
+
+            // Clear and populate grid
+            elements.imageGrid.innerHTML = '';
+
+            state.generatedImages.forEach((imgSrc, index) => {
+                const wrapper = document.createElement('div');
+                wrapper.className = 'relative group bg-gray-900 rounded-xl overflow-hidden';
+
+                const img = document.createElement('img');
+                img.src = imgSrc;
+                img.className = 'w-full h-auto rounded-xl shadow-lg image-preview transition-transform duration-200';
+                img.alt = `Generated image ${index + 1}`;
+
+                const downloadBtn = document.createElement('button');
+                downloadBtn.className = 'absolute bottom-3 right-3 bg-gray-800/90 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200';
+                downloadBtn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
+                    </svg>
+                    下載
+                `;
+                downloadBtn.onclick = () => downloadSingleImage(imgSrc, index);
+
+                wrapper.appendChild(img);
+                wrapper.appendChild(downloadBtn);
+                elements.imageGrid.appendChild(wrapper);
+            });
+
+            // Show grid and update UI
+            elements.imageGrid.classList.remove('hidden');
+            elements.downloadAllBtn.classList.remove('hidden');
+            elements.imageCountBadge.textContent = `${count} 張`;
+            elements.imageCountBadge.classList.remove('hidden');
         }
 
         // ==================== Image Analysis ====================
@@ -694,14 +771,26 @@
         }
 
         // ==================== Download ====================
-        function downloadImage() {
-            if (!state.generatedImage) return;
-
+        function downloadSingleImage(imgSrc, index) {
             const link = document.createElement('a');
-            link.download = `dll_pic_pro_${Date.now()}.png`;
-            link.href = state.generatedImage;
+            link.download = `dll_pic_pro_${Date.now()}_${index + 1}.png`;
+            link.href = imgSrc;
             link.click();
-            showSuccess('圖片下載中...');
+            showSuccess(`圖片 ${index + 1} 下載中...`);
+        }
+
+        function downloadAllImages() {
+            if (state.generatedImages.length === 0) return;
+
+            state.generatedImages.forEach((imgSrc, index) => {
+                setTimeout(() => {
+                    const link = document.createElement('a');
+                    link.download = `dll_pic_pro_${Date.now()}_${index + 1}.png`;
+                    link.href = imgSrc;
+                    link.click();
+                }, index * 300); // Stagger downloads to avoid browser blocking
+            });
+            showSuccess(`${state.generatedImages.length} 張圖片下載中...`);
         }
 
         // ==================== UI Helpers ====================
