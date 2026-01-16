@@ -530,6 +530,18 @@
             elements.promptInput.focus();
         }
 
+        // ==================== Helper ====================
+        function getRatioDescription(ratio) {
+            const map = {
+                "16:9": "Wide Landscape",
+                "9:16": "Tall Portrait",
+                "1:1": "Square",
+                "4:3": "Landscape",
+                "3:4": "Portrait"
+            };
+            return map[ratio] || "Standard";
+        }
+
         // ==================== Image Generation ====================
         async function generateImage() {
             const prompt = elements.promptInput.value.trim();
@@ -563,17 +575,16 @@
                 // Create array of fetch promises for parallel requests
                 const fetchPromises = Array.from({ length: imageCount }, () =>
                     fetch(
-                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${state.apiKey}`,
+                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${state.apiKey}`,
                         {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 contents: [{
-                                    parts: [{ text: `Generate an image: ${prompt}` }]
+                                    parts: [{ text: `Generate a high-resolution image, aspect ratio ${selectedRatio} (${getRatioDescription(selectedRatio)}): ${prompt}` }]
                                 }],
                                 generationConfig: {
-                                    responseModalities: ["TEXT", "IMAGE"],
-                                    aspectRatio: selectedRatio
+                                    responseModalities: ["TEXT", "IMAGE"]
                                 },
                                 safetySettings: [
                                     { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
