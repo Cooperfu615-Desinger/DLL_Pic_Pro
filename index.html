@@ -572,9 +572,7 @@
                                     parts: [{ text: `Generate an image: ${prompt}` }]
                                 }],
                                 generationConfig: {
-                                    responseModalities: ["TEXT", "IMAGE"],
-                                    aspectRatio: selectedRatio,
-                                    responseMimeType: "image/jpeg"
+                                    responseModalities: ["TEXT", "IMAGE"]
                                 },
                                 safetySettings: [
                                     { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
@@ -594,7 +592,9 @@
                 for (let i = 0; i < responses.length; i++) {
                     const response = responses[i];
                     if (!response.ok) {
-                        console.error(`Request ${i + 1} failed`);
+                        const errorData = await response.json();
+                        console.error(`[Debug] Request ${i + 1} failed with status ${response.status}:`, JSON.stringify(errorData, null, 2));
+                        showError(`API 錯誤 (${response.status}): ${errorData.error?.message || '未知錯誤'}`);
                         continue;
                     }
 
@@ -609,7 +609,7 @@
                     } else {
                         // Debug: Log full response if no image found
                         console.log(`[Debug] Request ${i + 1} - Full API Response:`, JSON.stringify(data, null, 2));
-                        
+
                         // Check if model returned text instead of image
                         const textPart = parts.find(p => p.text);
                         if (textPart) {
