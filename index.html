@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -8,39 +9,88 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         /* Custom scrollbar for dark theme */
-        ::-webkit-scrollbar { width: 8px; height: 8px; }
-        ::-webkit-scrollbar-track { background: #1f2937; }
-        ::-webkit-scrollbar-thumb { background: #4b5563; border-radius: 4px; }
-        ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
-        
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: #1f2937;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #4b5563;
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #6b7280;
+        }
+
         /* Loading spinner */
         .spinner {
-            border: 3px solid rgba(255,255,255,0.1);
+            border: 3px solid rgba(255, 255, 255, 0.1);
             border-top-color: #3b82f6;
             border-radius: 50%;
-            width: 24px;
-            height: 24px;
+            width: 40px;
+            height: 40px;
             animation: spin 0.8s linear infinite;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        
+
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
         /* Fade in animation */
-        .fade-in { animation: fadeIn 0.3s ease-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-10px); } to { opacity: 1; transform: translateY(0); } }
-        
+        .fade-in {
+            animation: fadeIn 0.3s ease-out;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
         /* Image preview hover */
-        .image-preview:hover { transform: scale(1.02); }
+        .image-preview:hover {
+            transform: scale(1.02);
+        }
+
+        /* Placeholder pattern */
+        .placeholder-pattern {
+            background-image:
+                linear-gradient(45deg, #374151 25%, transparent 25%),
+                linear-gradient(-45deg, #374151 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #374151 75%),
+                linear-gradient(-45deg, transparent 75%, #374151 75%);
+            background-size: 20px 20px;
+            background-position: 0 0, 0 10px, 10px -10px, -10px 0px;
+        }
     </style>
 </head>
+
 <body class="bg-gray-900 text-gray-100 min-h-screen">
     <!-- Settings Modal -->
-    <div id="settingsModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
+    <div id="settingsModal"
+        class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 hidden">
         <div class="bg-gray-800 rounded-2xl p-8 w-full max-w-md mx-4 shadow-2xl fade-in border border-gray-700">
             <div class="flex items-center gap-3 mb-6">
-                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
+                <div
+                    class="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
                     <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                     </svg>
                 </div>
                 <div>
@@ -48,165 +98,248 @@
                     <p class="text-sm text-gray-400">設置您的 API Key 開始使用</p>
                 </div>
             </div>
-            
+
             <div class="space-y-5">
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">選擇模型</label>
-                    <select id="modelSelect" class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                    <select id="modelSelect"
+                        class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
                         <option value="google">Google Gemini 2.5 Flash</option>
                         <option value="grok">xAI Grok (預留)</option>
                     </select>
                 </div>
-                
+
                 <div>
                     <label class="block text-sm font-medium text-gray-300 mb-2">API Key</label>
-                    <input type="password" id="apiKeyInput" placeholder="貼上您的 API Key..." 
-                           class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
+                    <input type="password" id="apiKeyInput" placeholder="貼上您的 API Key..."
+                        class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
                     <p class="text-xs text-gray-500 mt-2">🔒 Key 僅儲存於本地瀏覽器，不會上傳至伺服器</p>
                 </div>
-                
-                <button id="saveSettingsBtn" class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
+
+                <button id="saveSettingsBtn"
+                    class="w-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-3 px-6 rounded-xl transition-all duration-200 transform hover:scale-[1.02] active:scale-[0.98]">
                     儲存設定
                 </button>
             </div>
         </div>
     </div>
 
-    <!-- Main App -->
-    <div class="container mx-auto px-4 py-6 max-w-5xl">
+    <!-- Main App with Split View -->
+    <div class="min-h-screen">
         <!-- Header -->
-        <header class="flex items-center justify-between mb-8">
-            <div class="flex items-center gap-3">
-                <div class="w-12 h-12 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-2xl flex items-center justify-center shadow-lg shadow-purple-500/20">
-                    <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                    </svg>
-                </div>
-                <div>
-                    <h1 class="text-2xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">DLL_PIC Pro</h1>
-                    <p class="text-xs text-gray-500">AI 圖像生成工具</p>
+        <header class="sticky top-0 z-40 bg-gray-900/95 backdrop-blur-sm border-b border-gray-800">
+            <div class="container mx-auto px-4 py-4">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-3">
+                        <div
+                            class="w-10 h-10 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-xl flex items-center justify-center shadow-lg shadow-purple-500/20">
+                            <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h1
+                                class="text-xl font-bold bg-gradient-to-r from-blue-400 to-purple-400 bg-clip-text text-transparent">
+                                DLL_PIC Pro</h1>
+                            <p class="text-xs text-gray-500">AI 圖像生成工具</p>
+                        </div>
+                    </div>
+                    <button id="openSettingsBtn"
+                        class="p-2.5 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors border border-gray-700 hover:border-gray-600">
+                        <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
                 </div>
             </div>
-            <button id="openSettingsBtn" class="p-3 bg-gray-800 hover:bg-gray-700 rounded-xl transition-colors border border-gray-700 hover:border-gray-600">
-                <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/>
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/>
-                </svg>
-            </button>
         </header>
 
-        <!-- Tab Navigation -->
-        <div class="flex gap-2 mb-6">
-            <button id="tabGenerate" class="tab-btn active flex-1 py-3 px-4 rounded-xl font-medium transition-all bg-blue-600 text-white">
-                ✨ 文字生圖
-            </button>
-            <button id="tabAnalyze" class="tab-btn flex-1 py-3 px-4 rounded-xl font-medium transition-all bg-gray-800 text-gray-400 hover:bg-gray-700">
-                🔍 圖片反推
-            </button>
-        </div>
+        <!-- Split View Layout -->
+        <div class="container mx-auto px-4 py-6">
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
-        <!-- Text-to-Image Panel -->
-        <div id="generatePanel" class="space-y-4">
-            <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                <label class="block text-sm font-medium text-gray-300 mb-3">輸入 Prompt</label>
-                <textarea id="promptInput" rows="4" placeholder="描述您想要生成的圖像，例如：一隻在星空下的獨角獸，夢幻水彩風格..."
-                          class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
-                <div class="flex items-center justify-between mt-4">
-                    <p class="text-xs text-gray-500">💡 提示：描述越詳細，生成效果越好</p>
-                    <button id="generateBtn" class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-2.5 px-6 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span>生成圖像</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
-                        </svg>
-                    </button>
-                </div>
-            </div>
-        </div>
-
-        <!-- Image-to-Prompt Panel -->
-        <div id="analyzePanel" class="space-y-4 hidden">
-            <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                <label class="block text-sm font-medium text-gray-300 mb-3">上傳圖片</label>
-                <div id="dropZone" class="border-2 border-dashed border-gray-600 rounded-xl p-8 text-center hover:border-blue-500 transition-colors cursor-pointer">
-                    <input type="file" id="imageInput" accept="image/*" class="hidden">
-                    <div id="uploadPlaceholder">
-                        <svg class="w-12 h-12 mx-auto text-gray-500 mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/>
-                        </svg>
-                        <p class="text-gray-400">點擊或拖放圖片至此處</p>
-                        <p class="text-xs text-gray-500 mt-1">支援 JPG、PNG、WebP 格式</p>
+                <!-- Left Panel: Controls -->
+                <div class="md:col-span-4 space-y-4">
+                    <!-- Tab Navigation -->
+                    <div class="flex gap-2">
+                        <button id="tabGenerate"
+                            class="tab-btn active flex-1 py-2.5 px-4 rounded-xl font-medium transition-all bg-blue-600 text-white text-sm">
+                            ✨ 文字生圖
+                        </button>
+                        <button id="tabAnalyze"
+                            class="tab-btn flex-1 py-2.5 px-4 rounded-xl font-medium transition-all bg-gray-800 text-gray-400 hover:bg-gray-700 text-sm">
+                            🔍 圖片反推
+                        </button>
                     </div>
-                    <img id="uploadPreview" class="max-h-64 mx-auto rounded-lg hidden">
+
+                    <!-- Text-to-Image Panel -->
+                    <div id="generatePanel" class="space-y-4">
+                        <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700">
+                            <label class="block text-sm font-medium text-gray-300 mb-3">輸入 Prompt</label>
+                            <div class="relative">
+                                <textarea id="promptInput" rows="8" placeholder="描述您想要生成的圖像，例如：一隻在星空下的獨角獸，夢幻水彩風格..."
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
+                                <!-- Clear Button -->
+                                <button id="clearPromptBtn"
+                                    class="absolute top-3 right-3 p-1.5 bg-gray-700 hover:bg-red-600 rounded-lg transition-colors group"
+                                    title="清除內容">
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-white" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                            <div class="flex items-center justify-between mt-4">
+                                <p class="text-xs text-gray-500">💡 描述越詳細，效果越好</p>
+                                <button id="generateBtn"
+                                    class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                                    <span>生成圖像</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Image-to-Prompt Panel -->
+                    <div id="analyzePanel" class="space-y-4 hidden">
+                        <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700">
+                            <label class="block text-sm font-medium text-gray-300 mb-3">上傳圖片</label>
+                            <div id="dropZone"
+                                class="border-2 border-dashed border-gray-600 rounded-xl p-6 text-center hover:border-blue-500 transition-colors cursor-pointer">
+                                <input type="file" id="imageInput" accept="image/*" class="hidden">
+                                <div id="uploadPlaceholder">
+                                    <svg class="w-10 h-10 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    <p class="text-gray-400 text-sm">點擊或拖放圖片</p>
+                                    <p class="text-xs text-gray-500 mt-1">JPG、PNG、WebP</p>
+                                </div>
+                                <img id="uploadPreview" class="max-h-48 mx-auto rounded-lg hidden">
+                            </div>
+                            <div class="flex items-center justify-between mt-4">
+                                <button id="clearImageBtn"
+                                    class="text-sm text-gray-400 hover:text-red-400 transition-colors hidden flex items-center gap-1">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                    清除圖片
+                                </button>
+                                <button id="analyzeBtn"
+                                    class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ml-auto text-sm">
+                                    <span>分析圖片</span>
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+
+                        <!-- Analyzed Prompt Result -->
+                        <div id="analyzedPromptContainer"
+                            class="bg-gray-800 rounded-2xl p-5 border border-gray-700 hidden">
+                            <div class="flex items-center justify-between mb-3">
+                                <label class="text-sm font-medium text-gray-300">反推結果</label>
+                                <button id="usePromptBtn"
+                                    class="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                                    📋 使用此 Prompt
+                                </button>
+                            </div>
+                            <p id="analyzedPrompt" class="text-gray-200 leading-relaxed text-sm"></p>
+                        </div>
+                    </div>
+
+                    <!-- Loading State (in left panel) -->
+                    <div id="loadingState" class="hidden">
+                        <div
+                            class="bg-gray-800 rounded-2xl p-6 border border-gray-700 flex flex-col items-center justify-center">
+                            <div class="spinner mb-3"></div>
+                            <p id="loadingText" class="text-gray-400 text-sm">正在生成圖像...</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="flex items-center justify-between mt-4">
-                    <button id="clearImageBtn" class="text-sm text-gray-400 hover:text-white transition-colors hidden">
-                        ✕ 清除圖片
-                    </button>
-                    <button id="analyzeBtn" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-2.5 px-6 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ml-auto">
-                        <span>分析圖片</span>
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"/>
-                        </svg>
-                    </button>
+
+                <!-- Right Panel: Image Preview -->
+                <div class="md:col-span-8">
+                    <div class="bg-gray-800 rounded-2xl border border-gray-700 min-h-[calc(100vh-140px)] flex flex-col">
+                        <!-- Preview Header -->
+                        <div class="flex items-center justify-between p-4 border-b border-gray-700">
+                            <h3 class="font-semibold text-white flex items-center gap-2">
+                                <svg class="w-5 h-5 text-purple-400" fill="none" stroke="currentColor"
+                                    viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                                預覽區
+                            </h3>
+                            <button id="downloadBtn"
+                                class="flex items-center gap-2 text-sm bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition-colors hidden">
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                下載圖片
+                            </button>
+                        </div>
+
+                        <!-- Preview Content -->
+                        <div id="previewContent" class="flex-1 flex items-center justify-center p-6">
+                            <!-- Placeholder (shown when no image) -->
+                            <div id="previewPlaceholder" class="text-center">
+                                <div
+                                    class="w-32 h-32 mx-auto mb-4 rounded-2xl placeholder-pattern flex items-center justify-center">
+                                    <svg class="w-16 h-16 text-gray-600" fill="none" stroke="currentColor"
+                                        viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
+                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                </div>
+                                <p class="text-gray-500 text-lg mb-1">尚未生成圖片</p>
+                                <p class="text-gray-600 text-sm">輸入 Prompt 並點擊「生成圖像」開始</p>
+                            </div>
+
+                            <!-- Generated Image -->
+                            <img id="resultImage"
+                                class="hidden max-w-full max-h-[calc(100vh-240px)] rounded-xl shadow-2xl image-preview transition-transform duration-200 w-full object-contain">
+                        </div>
+                    </div>
                 </div>
-            </div>
-            
-            <!-- Analyzed Prompt Result -->
-            <div id="analyzedPromptContainer" class="bg-gray-800 rounded-2xl p-6 border border-gray-700 hidden">
-                <div class="flex items-center justify-between mb-3">
-                    <label class="text-sm font-medium text-gray-300">反推結果</label>
-                    <button id="usePromptBtn" class="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                        📋 使用此 Prompt
-                    </button>
-                </div>
-                <p id="analyzedPrompt" class="text-gray-200 leading-relaxed"></p>
             </div>
         </div>
+    </div>
 
-        <!-- Loading State -->
-        <div id="loadingState" class="hidden mt-6">
-            <div class="bg-gray-800 rounded-2xl p-8 border border-gray-700 flex flex-col items-center justify-center">
-                <div class="spinner mb-4"></div>
-                <p id="loadingText" class="text-gray-400">正在生成圖像...</p>
-            </div>
+    <!-- Error Toast -->
+    <div id="errorToast"
+        class="fixed bottom-6 right-6 bg-red-900/90 border border-red-700 text-white px-6 py-4 rounded-xl shadow-2xl hidden fade-in max-w-md z-50">
+        <div class="flex items-start gap-3">
+            <svg class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            <p id="errorMessage" class="text-sm"></p>
         </div>
+    </div>
 
-        <!-- Result Section -->
-        <div id="resultSection" class="mt-6 hidden fade-in">
-            <div class="bg-gray-800 rounded-2xl p-6 border border-gray-700">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="font-semibold text-white">生成結果</h3>
-                    <button id="downloadBtn" class="flex items-center gap-2 text-sm bg-gray-700 hover:bg-gray-600 px-4 py-2 rounded-lg transition-colors">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
-                        </svg>
-                        下載圖片
-                    </button>
-                </div>
-                <div class="flex justify-center">
-                    <img id="resultImage" class="max-w-full max-h-[500px] rounded-xl shadow-2xl image-preview transition-transform duration-200">
-                </div>
-            </div>
-        </div>
-
-        <!-- Error Toast -->
-        <div id="errorToast" class="fixed bottom-6 right-6 bg-red-900/90 border border-red-700 text-white px-6 py-4 rounded-xl shadow-2xl hidden fade-in max-w-md">
-            <div class="flex items-start gap-3">
-                <svg class="w-5 h-5 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                </svg>
-                <p id="errorMessage" class="text-sm"></p>
-            </div>
-        </div>
-
-        <!-- Success Toast -->
-        <div id="successToast" class="fixed bottom-6 right-6 bg-emerald-900/90 border border-emerald-700 text-white px-6 py-4 rounded-xl shadow-2xl hidden fade-in">
-            <div class="flex items-center gap-3">
-                <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
-                </svg>
-                <p id="successMessage" class="text-sm"></p>
-            </div>
+    <!-- Success Toast -->
+    <div id="successToast"
+        class="fixed bottom-6 right-6 bg-emerald-900/90 border border-emerald-700 text-white px-6 py-4 rounded-xl shadow-2xl hidden fade-in z-50">
+        <div class="flex items-center gap-3">
+            <svg class="w-5 h-5 text-emerald-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+            </svg>
+            <p id="successMessage" class="text-sm"></p>
         </div>
     </div>
 
@@ -226,15 +359,16 @@
             saveSettingsBtn: document.getElementById('saveSettingsBtn'),
             modelSelect: document.getElementById('modelSelect'),
             apiKeyInput: document.getElementById('apiKeyInput'),
-            
+
             tabGenerate: document.getElementById('tabGenerate'),
             tabAnalyze: document.getElementById('tabAnalyze'),
             generatePanel: document.getElementById('generatePanel'),
             analyzePanel: document.getElementById('analyzePanel'),
-            
+
             promptInput: document.getElementById('promptInput'),
+            clearPromptBtn: document.getElementById('clearPromptBtn'),
             generateBtn: document.getElementById('generateBtn'),
-            
+
             dropZone: document.getElementById('dropZone'),
             imageInput: document.getElementById('imageInput'),
             uploadPlaceholder: document.getElementById('uploadPlaceholder'),
@@ -244,13 +378,13 @@
             analyzedPromptContainer: document.getElementById('analyzedPromptContainer'),
             analyzedPrompt: document.getElementById('analyzedPrompt'),
             usePromptBtn: document.getElementById('usePromptBtn'),
-            
+
             loadingState: document.getElementById('loadingState'),
             loadingText: document.getElementById('loadingText'),
-            resultSection: document.getElementById('resultSection'),
+            previewPlaceholder: document.getElementById('previewPlaceholder'),
             resultImage: document.getElementById('resultImage'),
             downloadBtn: document.getElementById('downloadBtn'),
-            
+
             errorToast: document.getElementById('errorToast'),
             errorMessage: document.getElementById('errorMessage'),
             successToast: document.getElementById('successToast'),
@@ -263,11 +397,11 @@
             if (!state.apiKey) {
                 showSettingsModal();
             }
-            
+
             // Load saved settings
             elements.modelSelect.value = state.model;
             elements.apiKeyInput.value = state.apiKey;
-            
+
             // Event listeners
             setupEventListeners();
         }
@@ -281,14 +415,15 @@
                     hideSettingsModal();
                 }
             });
-            
+
             // Tabs
             elements.tabGenerate.addEventListener('click', () => switchTab('generate'));
             elements.tabAnalyze.addEventListener('click', () => switchTab('analyze'));
-            
+
             // Generate
             elements.generateBtn.addEventListener('click', generateImage);
-            
+            elements.clearPromptBtn.addEventListener('click', clearPrompt);
+
             // Image upload
             elements.dropZone.addEventListener('click', () => elements.imageInput.click());
             elements.imageInput.addEventListener('change', handleImageUpload);
@@ -303,7 +438,7 @@
             elements.clearImageBtn.addEventListener('click', clearUploadedImage);
             elements.analyzeBtn.addEventListener('click', analyzeImage);
             elements.usePromptBtn.addEventListener('click', useAnalyzedPrompt);
-            
+
             // Download
             elements.downloadBtn.addEventListener('click', downloadImage);
         }
@@ -320,18 +455,18 @@
         function saveSettings() {
             const apiKey = elements.apiKeyInput.value.trim();
             const model = elements.modelSelect.value;
-            
+
             if (!apiKey) {
                 showError('請輸入 API Key');
                 return;
             }
-            
+
             state.apiKey = apiKey;
             state.model = model;
-            
+
             localStorage.setItem('dll_pic_pro_api_key', apiKey);
             localStorage.setItem('dll_pic_pro_model', model);
-            
+
             hideSettingsModal();
             showSuccess('設定已儲存');
         }
@@ -355,15 +490,21 @@
             }
         }
 
+        // ==================== Clear Prompt ====================
+        function clearPrompt() {
+            elements.promptInput.value = '';
+            elements.promptInput.focus();
+        }
+
         // ==================== Image Generation ====================
         async function generateImage() {
             const prompt = elements.promptInput.value.trim();
-            
+
             if (!prompt) {
                 showError('請輸入 Prompt');
                 return;
             }
-            
+
             if (!state.apiKey) {
                 showError('請先設置 API Key');
                 showSettingsModal();
@@ -371,7 +512,10 @@
             }
 
             showLoading('正在生成圖像...');
-            elements.resultSection.classList.add('hidden');
+            // Hide placeholder, keep result image hidden during loading
+            elements.previewPlaceholder.classList.add('hidden');
+            elements.resultImage.classList.add('hidden');
+            elements.downloadBtn.classList.add('hidden');
 
             try {
                 // Use Gemini 2.5 Flash with image generation
@@ -397,23 +541,26 @@
                 }
 
                 const data = await response.json();
-                
+
                 // Extract image from response
                 const parts = data.candidates?.[0]?.content?.parts || [];
                 const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
-                
+
                 if (imagePart) {
                     const base64Data = imagePart.inlineData.data;
                     const mimeType = imagePart.inlineData.mimeType;
                     state.generatedImage = `data:${mimeType};base64,${base64Data}`;
                     elements.resultImage.src = state.generatedImage;
-                    elements.resultSection.classList.remove('hidden');
+                    elements.resultImage.classList.remove('hidden');
+                    elements.downloadBtn.classList.remove('hidden');
                     showSuccess('圖像生成成功！');
                 } else {
                     throw new Error('API 回應中未包含圖像數據');
                 }
             } catch (error) {
                 showError(error.message);
+                // Show placeholder again on error
+                elements.previewPlaceholder.classList.remove('hidden');
             } finally {
                 hideLoading();
             }
@@ -460,7 +607,7 @@
                 showError('請先上傳圖片');
                 return;
             }
-            
+
             if (!state.apiKey) {
                 showError('請先設置 API Key');
                 showSettingsModal();
@@ -504,7 +651,7 @@
 
                 const data = await response.json();
                 const promptText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-                
+
                 if (promptText) {
                     elements.analyzedPrompt.textContent = promptText;
                     elements.analyzedPromptContainer.classList.remove('hidden');
@@ -529,7 +676,7 @@
         // ==================== Download ====================
         function downloadImage() {
             if (!state.generatedImage) return;
-            
+
             const link = document.createElement('a');
             link.download = `dll_pic_pro_${Date.now()}.png`;
             link.href = state.generatedImage;
@@ -567,4 +714,5 @@
         init();
     </script>
 </body>
+
 </html>
