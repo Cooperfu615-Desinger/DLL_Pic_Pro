@@ -572,7 +572,8 @@
                                     parts: [{ text: `Generate an image: ${prompt}` }]
                                 }],
                                 generationConfig: {
-                                    responseModalities: ["TEXT", "IMAGE"]
+                                    responseModalities: ["TEXT", "IMAGE"],
+                                    aspectRatio: selectedRatio
                                 },
                                 safetySettings: [
                                     { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
