@@ -376,6 +376,19 @@
 
     <script>
         // ==================== State Management ====================
+        const MODEL_CONFIG = {
+            google: {
+                label: 'Google Gemini',
+                generationModel: 'gemini-2.5-flash-image',
+                analysisModel: 'gemini-2.5-flash'
+            },
+            grok: {
+                label: 'xAI Grok',
+                generationModel: null,
+                analysisModel: null
+            }
+        };
+
         const state = {
             apiKey: localStorage.getItem('dll_pic_pro_api_key') || '',
             model: localStorage.getItem('dll_pic_pro_model') || 'google',
@@ -542,9 +555,60 @@
             return map[ratio] || "Standard";
         }
 
+        function getActiveModelConfig() {
+            return MODEL_CONFIG[state.model] || MODEL_CONFIG.google;
+        }
+
+        function buildApiUrl(modelName) {
+            return `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${state.apiKey}`;
+        }
+
+        async function parseApiError(response) {
+            let payload = null;
+
+            try {
+                payload = await response.json();
+            } catch {
+                // Ignore JSON parse failures and fall back to status text.
+            }
+
+            const apiMessage = payload?.error?.message;
+            const promptBlockReason = payload?.promptFeedback?.blockReason;
+            const finishReason = payload?.candidates?.[0]?.finishReason;
+
+            if (apiMessage) {
+                return `API 錯誤 (${response.status}): ${apiMessage}`;
+            }
+
+            if (promptBlockReason) {
+                return `請求被模型阻擋：${promptBlockReason}`;
+            }
+
+            if (finishReason === 'SAFETY') {
+                return '請求被安全機制阻擋，請改寫 Prompt 後重試';
+            }
+
+            return `API 請求失敗 (${response.status}${response.statusText ? ` ${response.statusText}` : ''})`;
+        }
+
+        async function fetchWithTimeout(url, options, timeoutMs = 90000) {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+
+            try {
+                return await fetch(url, {
+                    ...options,
+                    signal: controller.signal
+                });
+            } finally {
+                clearTimeout(timeoutId);
+            }
+        }
+
         // ==================== Image Generation ====================
         async function generateImage() {
             const prompt = elements.promptInput.value.trim();
+            const activeModel = getActiveModelConfig();
 
             if (!prompt) {
                 showError('請輸入 Prompt');
@@ -554,6 +618,11 @@
             if (!state.apiKey) {
                 showError('請先設置 API Key');
                 showSettingsModal();
+                return;
+            }
+
+            if (!activeModel.generationModel) {
+                showError(`${activeModel.label} 目前尚未接入生圖功能`);
                 return;
             }
 
@@ -574,24 +643,15 @@
             try {
                 // Create array of fetch promises for parallel requests
                 const fetchPromises = Array.from({ length: imageCount }, () =>
-                    fetch(
-                        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${state.apiKey}`,
+                    fetchWithTimeout(
+                        buildApiUrl(activeModel.generationModel),
                         {
                             method: 'POST',
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 contents: [{
-                                    parts: [{ text: `Generate a high-resolution image, aspect ratio ${selectedRatio} (${getRatioDescription(selectedRatio)}): ${prompt}` }]
-                                }],
-                                generationConfig: {
-                                    responseModalities: ["TEXT", "IMAGE"]
-                                },
-                                safetySettings: [
-                                    { category: "HARM_CATEGORY_HARASSMENT", threshold: "BLOCK_NONE" },
-                                    { category: "HARM_CATEGORY_HATE_SPEECH", threshold: "BLOCK_NONE" },
-                                    { category: "HARM_CATEGORY_SEXUALLY_EXPLICIT", threshold: "BLOCK_NONE" },
-                                    { category: "HARM_CATEGORY_DANGEROUS_CONTENT", threshold: "BLOCK_NONE" }
-                                ]
+                                    parts: [{ text: `Generate a high-resolution image with aspect ratio ${selectedRatio} (${getRatioDescription(selectedRatio)}). Prompt: ${prompt}` }]
+                                }]
                             })
                         }
                     )
@@ -604,9 +664,9 @@
                 for (let i = 0; i < responses.length; i++) {
                     const response = responses[i];
                     if (!response.ok) {
-                        const errorData = await response.json();
-                        console.error(`[Debug] Request ${i + 1} failed with status ${response.status}:`, JSON.stringify(errorData, null, 2));
-                        showError(`API 錯誤 (${response.status}): ${errorData.error?.message || '未知錯誤'}`);
+                        const errorMessage = await parseApiError(response);
+                        console.error(`[Debug] Request ${i + 1} failed with status ${response.status}:`, errorMessage);
+                        showError(errorMessage);
                         continue;
                     }
 
@@ -627,6 +687,8 @@
                         if (textPart) {
                             console.log(`[Debug] Request ${i + 1} - Model Response Text:`, textPart.text);
                             showError(`模型回應: ${textPart.text}`);
+                        } else if (data.promptFeedback?.blockReason) {
+                            showError(`請求被模型阻擋：${data.promptFeedback.blockReason}`);
                         }
                     }
                 }
@@ -637,10 +699,14 @@
                 } else {
                     // Debug: No images at all
                     console.error('[Debug] No images generated from any request');
-                    throw new Error('API 回應中未包含圖像數據，請檢查 Console 查看詳細錯誤');
+                    throw new Error('API 回應中未包含圖像資料。這通常代表模型未真的回圖，或請求已被阻擋。');
                 }
             } catch (error) {
-                showError(error.message);
+                if (error.name === 'AbortError') {
+                    showError('請求逾時，請稍後重試');
+                } else {
+                    showError(error.message);
+                }
                 // Show placeholder again on error
                 elements.previewPlaceholder.classList.remove('hidden');
             } finally {
@@ -730,6 +796,8 @@
         }
 
         async function analyzeImage() {
+            const activeModel = getActiveModelConfig();
+
             if (!state.uploadedImage) {
                 showError('請先上傳圖片');
                 return;
@@ -741,6 +809,11 @@
                 return;
             }
 
+            if (!activeModel.analysisModel) {
+                showError(`${activeModel.label} 目前尚未接入圖片分析功能`);
+                return;
+            }
+
             showLoading('正在分析圖片...');
 
             try {
@@ -748,8 +821,8 @@
                 const base64Data = state.uploadedImage.split(',')[1];
                 const mimeType = state.uploadedImage.split(';')[0].split(':')[1];
 
-                const response = await fetch(
-                    `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${state.apiKey}`,
+                const response = await fetchWithTimeout(
+                    buildApiUrl(activeModel.analysisModel),
                     {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
@@ -772,8 +845,7 @@
                 );
 
                 if (!response.ok) {
-                    const errorData = await response.json();
-                    throw new Error(errorData.error?.message || `API 請求失敗 (${response.status})`);
+                    throw new Error(await parseApiError(response));
                 }
 
                 const data = await response.json();
@@ -787,7 +859,11 @@
                     throw new Error('無法解析 API 回應');
                 }
             } catch (error) {
-                showError(error.message);
+                if (error.name === 'AbortError') {
+                    showError('請求逾時，請稍後重試');
+                } else {
+                    showError(error.message);
+                }
             } finally {
                 hideLoading();
             }
