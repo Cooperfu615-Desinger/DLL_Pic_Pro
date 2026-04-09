@@ -104,7 +104,7 @@
                     <label class="block text-sm font-medium text-gray-300 mb-2">選擇模型</label>
                     <select id="modelSelect"
                         class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
-                        <option value="google">Google Gemini 2.5 Flash</option>
+                        <option value="google">Google Gemini 2.5 Flash / Image</option>
                         <option value="grok">xAI Grok (預留)</option>
                     </select>
                 </div>
@@ -544,17 +544,6 @@
         }
 
         // ==================== Helper ====================
-        function getRatioDescription(ratio) {
-            const map = {
-                "16:9": "Wide Landscape",
-                "9:16": "Tall Portrait",
-                "1:1": "Square",
-                "4:3": "Landscape",
-                "3:4": "Portrait"
-            };
-            return map[ratio] || "Standard";
-        }
-
         function getActiveModelConfig() {
             return MODEL_CONFIG[state.model] || MODEL_CONFIG.google;
         }
@@ -650,8 +639,14 @@
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({
                                 contents: [{
-                                    parts: [{ text: `Generate a high-resolution image with aspect ratio ${selectedRatio} (${getRatioDescription(selectedRatio)}). Prompt: ${prompt}` }]
-                                }]
+                                    parts: [{ text: prompt }]
+                                }],
+                                generationConfig: {
+                                    responseModalities: ['TEXT', 'IMAGE'],
+                                    imageConfig: {
+                                        aspectRatio: selectedRatio
+                                    }
+                                }
                             })
                         }
                     )
