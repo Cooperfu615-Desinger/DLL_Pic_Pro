@@ -163,40 +163,25 @@
             <div class="grid grid-cols-1 md:grid-cols-12 gap-6">
 
                 <!-- Left Panel: Controls -->
-                <div class="md:col-span-4 space-y-4">
-                    <!-- Tab Navigation -->
-                    <div class="flex gap-2">
-                        <button id="tabGenerate"
-                            class="tab-btn active flex-1 py-2.5 px-4 rounded-xl font-medium transition-all bg-blue-600 text-white text-sm">
-                            ✨ 文字生圖
-                        </button>
-                        <button id="tabAnalyze"
-                            class="tab-btn flex-1 py-2.5 px-4 rounded-xl font-medium transition-all bg-gray-800 text-gray-400 hover:bg-gray-700 text-sm">
-                            🔍 圖片反推
-                        </button>
-                    </div>
-
-                    <!-- Text-to-Image Panel -->
-                    <div id="generatePanel" class="space-y-4">
-                        <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700">
-                            <label class="block text-sm font-medium text-gray-300 mb-3">輸入 Prompt</label>
-                            <div class="relative">
-                                <textarea id="promptInput" rows="8" placeholder="描述您想要生成的圖像，例如：一隻在星空下的獨角獸，夢幻水彩風格..."
-                                    class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
-                                <!-- Clear Button -->
-                                <button id="clearPromptBtn"
-                                    class="absolute top-3 right-3 p-1.5 bg-gray-700 hover:bg-red-600 rounded-lg transition-colors group"
-                                    title="清除內容">
-                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-white" fill="none"
-                                        stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                </button>
+                <div class="md:col-span-8 space-y-4">
+                    <div class="bg-gray-800 rounded-2xl p-4 border border-gray-700">
+                        <div class="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+                            <div>
+                                <p class="text-sm font-medium text-gray-200">生成設定</p>
+                                <div class="flex flex-wrap gap-3 text-xs text-gray-400 mt-2">
+                                    <span>Provider：<span id="providerSummary" class="text-gray-200">Google Gemini</span></span>
+                                    <span>模型：<span id="modelSummary" class="text-gray-200">gemini-2.5-flash-image</span></span>
+                                    <span>API Key：<span id="apiKeyStatus" class="text-gray-200">未設定</span></span>
+                                </div>
                             </div>
+                            <button id="openSettingsPanelBtn"
+                                class="self-start lg:self-auto px-4 py-2 rounded-xl bg-gray-700 hover:bg-gray-600 text-sm text-white transition-colors border border-gray-600">
+                                API / 模型設定
+                            </button>
+                        </div>
 
-                            <!-- Aspect Ratio Selector -->
-                            <div class="mt-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                            <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">圖片比例</label>
                                 <select id="aspectRatio"
                                     class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm">
@@ -207,9 +192,7 @@
                                     <option value="3:4">3:4 (Portrait Standard)</option>
                                 </select>
                             </div>
-
-                            <!-- Image Count Selector -->
-                            <div class="mt-4">
+                            <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">生成張數</label>
                                 <select id="imageCount"
                                     class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm">
@@ -219,10 +202,46 @@
                                     <option value="4">4 張</option>
                                 </select>
                             </div>
+                        </div>
+                    </div>
 
+                    <!-- Tab Navigation -->
+                    <div class="flex gap-2">
+                        <button id="tabPrompt"
+                            class="tab-btn active flex-1 py-2.5 px-4 rounded-xl font-medium transition-all bg-blue-600 text-white text-sm">
+                            A. Prompt 模板
+                        </button>
+                        <button id="tabStudio"
+                            class="tab-btn flex-1 py-2.5 px-4 rounded-xl font-medium transition-all bg-gray-800 text-gray-400 hover:bg-gray-700 text-sm">
+                            B. 攝影棚工作流
+                        </button>
+                    </div>
+
+                    <!-- Prompt Template Panel -->
+                    <div id="promptPanel" class="space-y-4">
+                        <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700">
+                            <div class="flex items-center justify-between gap-4 mb-3">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300">Prompt 輸入</label>
+                                    <p class="text-xs text-gray-500 mt-1">直接輸入完整 Prompt，快速出圖看方向。</p>
+                                </div>
+                            </div>
+                            <div class="relative">
+                                <textarea id="promptInput" rows="10" placeholder="直接貼上或撰寫完整 Prompt..."
+                                    class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
+                                <button id="clearPromptBtn"
+                                    class="absolute top-3 right-3 p-1.5 bg-gray-700 hover:bg-red-600 rounded-lg transition-colors group"
+                                    title="清除內容">
+                                    <svg class="w-4 h-4 text-gray-400 group-hover:text-white" fill="none"
+                                        stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
                             <div class="flex items-center justify-between mt-4">
-                                <p class="text-xs text-gray-500">💡 描述越詳細，效果越好</p>
-                                <button id="generateBtn"
+                                <p class="text-xs text-gray-500">這頁只保留最直接的生成控制。</p>
+                                <button id="promptGenerateBtn"
                                     class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
                                     <span>生成圖像</span>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -234,55 +253,163 @@
                         </div>
                     </div>
 
-                    <!-- Image-to-Prompt Panel -->
-                    <div id="analyzePanel" class="space-y-4 hidden">
-                        <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700">
-                            <label class="block text-sm font-medium text-gray-300 mb-3">上傳圖片</label>
-                            <div id="dropZone"
-                                class="border-2 border-dashed border-gray-600 rounded-xl p-6 text-center hover:border-blue-500 transition-colors cursor-pointer">
-                                <input type="file" id="imageInput" accept="image/*" class="hidden">
-                                <div id="uploadPlaceholder">
-                                    <svg class="w-10 h-10 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor"
-                                        viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                                    </svg>
-                                    <p class="text-gray-400 text-sm">點擊或拖放圖片</p>
-                                    <p class="text-xs text-gray-500 mt-1">JPG、PNG、WebP</p>
+                    <!-- Studio Workflow Panel -->
+                    <div id="studioPanel" class="space-y-4 hidden">
+                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                            <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700 space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">人物專屬 Prompt</label>
+                                    <textarea id="characterPromptInput" rows="5" placeholder="貼上人物專屬 Prompt，例如角色外型、服裝、髮型、辨識特徵..."
+                                        class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
                                 </div>
-                                <img id="uploadPreview" class="max-h-48 mx-auto rounded-lg hidden">
+
+                                <div>
+                                    <div class="flex items-center justify-between mb-2">
+                                        <label class="block text-sm font-medium text-gray-300">人物參考圖片</label>
+                                        <button id="clearImageBtn"
+                                            class="text-xs text-gray-400 hover:text-red-400 transition-colors hidden">
+                                            清除圖片
+                                        </button>
+                                    </div>
+                                    <div id="dropZone"
+                                        class="border-2 border-dashed border-gray-600 rounded-xl p-4 text-center hover:border-blue-500 transition-colors cursor-pointer bg-gray-900/60">
+                                        <input type="file" id="imageInput" accept="image/*" class="hidden">
+                                        <div id="uploadPlaceholder">
+                                            <svg class="w-8 h-8 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor"
+                                                viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            <p class="text-gray-400 text-sm">點擊或拖放人物圖片</p>
+                                            <p class="text-xs text-gray-500 mt-1">JPG、PNG、WebP</p>
+                                        </div>
+                                        <img id="uploadPreview" class="max-h-32 mx-auto rounded-lg hidden">
+                                    </div>
+                                    <div class="flex justify-end mt-3">
+                                        <button id="analyzeBtn"
+                                            class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                                            <span>分析圖片</span>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="flex items-center justify-between mt-4">
-                                <button id="clearImageBtn"
-                                    class="text-sm text-gray-400 hover:text-red-400 transition-colors hidden flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                    </svg>
-                                    清除圖片
-                                </button>
-                                <button id="analyzeBtn"
-                                    class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed ml-auto text-sm">
-                                    <span>分析圖片</span>
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                            d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </button>
+
+                            <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700 space-y-4">
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">攝影棚方向 Prompt</label>
+                                    <textarea id="studioPromptInput" rows="5" placeholder="補上你這次想測的攝影方向，例如棚拍風格、光線、構圖、情緒..."
+                                        class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
+                                </div>
+
+                                <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
+                                    <p class="text-sm font-medium text-gray-200">模板分類</p>
+                                    <p class="text-xs text-gray-500 mt-1">先套一個方向，再用快速加詞微調。</p>
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
+                                        <button type="button" data-template="fashionEditorial" class="prompt-template-btn text-left rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors">時尚形象</button>
+                                        <button type="button" data-template="cinematicPortrait" class="prompt-template-btn text-left rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors">電影感人像</button>
+                                        <button type="button" data-template="beautyCloseup" class="prompt-template-btn text-left rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors">美妝特寫</button>
+                                        <button type="button" data-template="productHero" class="prompt-template-btn text-left rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors">產品主視覺</button>
+                                        <button type="button" data-template="interiorMood" class="prompt-template-btn text-left rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors sm:col-span-2">空間氛圍</button>
+                                    </div>
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Analyzed Prompt Result -->
-                        <div id="analyzedPromptContainer"
-                            class="bg-gray-800 rounded-2xl p-5 border border-gray-700 hidden">
-                            <div class="flex items-center justify-between mb-3">
-                                <label class="text-sm font-medium text-gray-300">反推結果</label>
-                                <button id="usePromptBtn"
-                                    class="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                                    📋 使用此 Prompt
-                                </button>
+                        <div class="grid grid-cols-1 lg:grid-cols-[1.3fr_0.9fr] gap-4">
+                            <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700 space-y-4">
+                                <div>
+                                    <p class="text-sm font-medium text-gray-200">快速加詞</p>
+                                    <p class="text-xs text-gray-500 mt-1">這些標籤會加到「攝影棚方向 Prompt」。</p>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">構圖</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button type="button" data-fragment="close-up portrait" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">特寫</button>
+                                        <button type="button" data-fragment="half-body fashion portrait" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">半身</button>
+                                        <button type="button" data-fragment="full-body editorial shot" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">全身</button>
+                                        <button type="button" data-fragment="hero product composition" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">主視覺</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">鏡頭</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button type="button" data-fragment="35mm lens" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">35mm</button>
+                                        <button type="button" data-fragment="50mm lens" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">50mm</button>
+                                        <button type="button" data-fragment="85mm lens" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">85mm</button>
+                                        <button type="button" data-fragment="shallow depth of field" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">淺景深</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">光線</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button type="button" data-fragment="soft diffused studio lighting" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">柔光棚燈</button>
+                                        <button type="button" data-fragment="dramatic rim lighting" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">輪廓光</button>
+                                        <button type="button" data-fragment="natural window light" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">窗光</button>
+                                        <button type="button" data-fragment="controlled specular highlights" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">高光控制</button>
+                                    </div>
+                                </div>
+
+                                <div>
+                                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">氛圍</p>
+                                    <div class="flex flex-wrap gap-2">
+                                        <button type="button" data-fragment="clean luxury aesthetic" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">奢華感</button>
+                                        <button type="button" data-fragment="moody cinematic atmosphere" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">電影感</button>
+                                        <button type="button" data-fragment="minimal premium composition" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">極簡感</button>
+                                        <button type="button" data-fragment="high-end commercial polish" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">商業感</button>
+                                    </div>
+                                </div>
                             </div>
-                            <p id="analyzedPrompt" class="text-gray-200 leading-relaxed text-sm"></p>
+
+                            <div class="space-y-4">
+                                <div id="analyzedPromptContainer"
+                                    class="bg-gray-800 rounded-2xl p-5 border border-gray-700 hidden">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <label class="text-sm font-medium text-gray-300">圖片分析結果</label>
+                                        <button id="usePromptBtn"
+                                            class="text-sm text-blue-400 hover:text-blue-300 transition-colors">
+                                            套用到人物設定
+                                        </button>
+                                    </div>
+                                    <p id="analyzedPrompt" class="text-gray-200 leading-relaxed text-sm"></p>
+                                </div>
+
+                                <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700 space-y-4">
+                                    <div class="flex items-center justify-between">
+                                        <div>
+                                            <p class="text-sm font-medium text-gray-200">最終 Prompt</p>
+                                            <p class="text-xs text-gray-500 mt-1">由人物設定與攝影方向組合而成。</p>
+                                        </div>
+                                        <button id="composePromptBtn"
+                                            class="text-sm px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors">
+                                            重新組合
+                                        </button>
+                                    </div>
+                                    <textarea id="studioFinalPrompt" rows="11"
+                                        class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"
+                                        placeholder="人物設定與攝影方向會在這裡合併顯示..." readonly></textarea>
+                                    <div class="flex items-center justify-between gap-3">
+                                        <button id="clearStudioBtn"
+                                            class="px-4 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-white text-sm transition-colors">
+                                            清除工作流
+                                        </button>
+                                        <button id="studioGenerateBtn"
+                                            class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                                            <span>生成圖像</span>
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                    d="M13 10V3L4 14h7v7l9-11h-7z" />
+                                            </svg>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
 
@@ -297,8 +424,8 @@
                 </div>
 
                 <!-- Right Panel: Image Preview -->
-                <div class="md:col-span-8">
-                    <div class="bg-gray-800 rounded-2xl border border-gray-700 min-h-[calc(100vh-140px)] flex flex-col">
+                <div class="md:col-span-4">
+                    <div class="bg-gray-800 rounded-2xl border border-gray-700 h-full flex flex-col">
                         <!-- Preview Header -->
                         <div class="flex items-center justify-between p-4 border-b border-gray-700">
                             <h3 class="font-semibold text-white flex items-center gap-2">
@@ -322,20 +449,20 @@
                         </div>
 
                         <!-- Preview Content -->
-                        <div id="previewContent" class="flex-1 p-4 overflow-auto">
+                        <div id="previewContent" class="flex-1 p-4 overflow-auto max-h-[72vh]">
                             <!-- Placeholder (shown when no image) -->
-                            <div id="previewPlaceholder" class="h-full flex items-center justify-center">
+                            <div id="previewPlaceholder" class="h-full min-h-[320px] flex items-center justify-center">
                                 <div class="text-center">
                                     <div
-                                        class="w-32 h-32 mx-auto mb-4 rounded-2xl placeholder-pattern flex items-center justify-center">
-                                        <svg class="w-16 h-16 text-gray-600" fill="none" stroke="currentColor"
+                                        class="w-24 h-24 mx-auto mb-4 rounded-2xl placeholder-pattern flex items-center justify-center">
+                                        <svg class="w-12 h-12 text-gray-600" fill="none" stroke="currentColor"
                                             viewBox="0 0 24 24">
                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"
                                                 d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                         </svg>
                                     </div>
-                                    <p class="text-gray-500 text-lg mb-1">尚未生成圖片</p>
-                                    <p class="text-gray-600 text-sm">輸入 Prompt 並點擊「生成圖像」開始</p>
+                                    <p class="text-gray-500 text-base mb-1">尚未生成圖片</p>
+                                    <p class="text-gray-600 text-sm">左側完成設定後按下生成即可預覽。</p>
                                 </div>
                             </div>
 
@@ -389,6 +516,14 @@
             }
         };
 
+        const PROMPT_TEMPLATES = {
+            fashionEditorial: "A high-end fashion editorial portrait, confident model, luxury styling, clean composition, premium commercial photography, refined skin texture, subtle cinematic color grading, highly detailed, professional studio quality",
+            cinematicPortrait: "A cinematic portrait of the subject, dramatic mood, layered depth, realistic skin texture, subtle film grain, strong focal separation, polished color grading, premium photography direction, highly detailed",
+            beautyCloseup: "A beauty close-up portrait, flawless makeup detail, luminous skin, clean beauty campaign direction, macro-level facial detail, soft premium lighting, elegant composition, high-end commercial photography",
+            productHero: "A premium product hero shot, luxury commercial photography, precise reflections, carefully controlled highlights, clean backdrop, sharp details, polished advertising aesthetic, highly refined presentation",
+            interiorMood: "A sophisticated interior lifestyle photograph, curated set design, balanced composition, tasteful materials, natural depth, editorial decor direction, soft realistic light, premium visual storytelling"
+        };
+
         const state = {
             apiKey: localStorage.getItem('dll_pic_pro_api_key') || '',
             model: localStorage.getItem('dll_pic_pro_model') || 'google',
@@ -400,20 +535,32 @@
         const elements = {
             settingsModal: document.getElementById('settingsModal'),
             openSettingsBtn: document.getElementById('openSettingsBtn'),
+            openSettingsPanelBtn: document.getElementById('openSettingsPanelBtn'),
             saveSettingsBtn: document.getElementById('saveSettingsBtn'),
             modelSelect: document.getElementById('modelSelect'),
             apiKeyInput: document.getElementById('apiKeyInput'),
 
-            tabGenerate: document.getElementById('tabGenerate'),
-            tabAnalyze: document.getElementById('tabAnalyze'),
-            generatePanel: document.getElementById('generatePanel'),
-            analyzePanel: document.getElementById('analyzePanel'),
+            providerSummary: document.getElementById('providerSummary'),
+            modelSummary: document.getElementById('modelSummary'),
+            apiKeyStatus: document.getElementById('apiKeyStatus'),
+
+            tabPrompt: document.getElementById('tabPrompt'),
+            tabStudio: document.getElementById('tabStudio'),
+            promptPanel: document.getElementById('promptPanel'),
+            studioPanel: document.getElementById('studioPanel'),
 
             promptInput: document.getElementById('promptInput'),
             clearPromptBtn: document.getElementById('clearPromptBtn'),
             aspectRatioSelect: document.getElementById('aspectRatio'),
             imageCountSelect: document.getElementById('imageCount'),
-            generateBtn: document.getElementById('generateBtn'),
+            promptGenerateBtn: document.getElementById('promptGenerateBtn'),
+
+            characterPromptInput: document.getElementById('characterPromptInput'),
+            studioPromptInput: document.getElementById('studioPromptInput'),
+            studioFinalPrompt: document.getElementById('studioFinalPrompt'),
+            composePromptBtn: document.getElementById('composePromptBtn'),
+            clearStudioBtn: document.getElementById('clearStudioBtn'),
+            studioGenerateBtn: document.getElementById('studioGenerateBtn'),
 
             dropZone: document.getElementById('dropZone'),
             imageInput: document.getElementById('imageInput'),
@@ -448,6 +595,8 @@
             // Load saved settings
             elements.modelSelect.value = state.model;
             elements.apiKeyInput.value = state.apiKey;
+            updateSettingsSummary();
+            composeStudioPrompt();
 
             // Event listeners
             setupEventListeners();
@@ -456,6 +605,7 @@
         function setupEventListeners() {
             // Settings
             elements.openSettingsBtn.addEventListener('click', showSettingsModal);
+            elements.openSettingsPanelBtn.addEventListener('click', showSettingsModal);
             elements.saveSettingsBtn.addEventListener('click', saveSettings);
             elements.settingsModal.addEventListener('click', (e) => {
                 if (e.target === elements.settingsModal && state.apiKey) {
@@ -464,12 +614,23 @@
             });
 
             // Tabs
-            elements.tabGenerate.addEventListener('click', () => switchTab('generate'));
-            elements.tabAnalyze.addEventListener('click', () => switchTab('analyze'));
+            elements.tabPrompt.addEventListener('click', () => switchTab('prompt'));
+            elements.tabStudio.addEventListener('click', () => switchTab('studio'));
 
             // Generate
-            elements.generateBtn.addEventListener('click', generateImage);
+            elements.promptGenerateBtn.addEventListener('click', () => generateImage('prompt'));
             elements.clearPromptBtn.addEventListener('click', clearPrompt);
+            elements.studioGenerateBtn.addEventListener('click', () => generateImage('studio'));
+            elements.composePromptBtn.addEventListener('click', composeStudioPrompt);
+            elements.clearStudioBtn.addEventListener('click', clearStudioWorkflow);
+            document.querySelectorAll('.prompt-template-btn').forEach((button) => {
+                button.addEventListener('click', () => applyPromptTemplate(button.dataset.template));
+            });
+            document.querySelectorAll('.prompt-fragment-btn').forEach((button) => {
+                button.addEventListener('click', () => appendPromptFragment(button.dataset.fragment));
+            });
+            elements.characterPromptInput.addEventListener('input', composeStudioPrompt);
+            elements.studioPromptInput.addEventListener('input', composeStudioPrompt);
 
             // Image upload
             elements.dropZone.addEventListener('click', () => elements.imageInput.click());
@@ -515,25 +676,26 @@
             localStorage.setItem('dll_pic_pro_model', model);
 
             hideSettingsModal();
+            updateSettingsSummary();
             showSuccess('設定已儲存');
         }
 
         // ==================== Tab Navigation ====================
         function switchTab(tab) {
-            if (tab === 'generate') {
-                elements.tabGenerate.classList.add('bg-blue-600', 'text-white');
-                elements.tabGenerate.classList.remove('bg-gray-800', 'text-gray-400');
-                elements.tabAnalyze.classList.remove('bg-blue-600', 'text-white');
-                elements.tabAnalyze.classList.add('bg-gray-800', 'text-gray-400');
-                elements.generatePanel.classList.remove('hidden');
-                elements.analyzePanel.classList.add('hidden');
+            if (tab === 'prompt') {
+                elements.tabPrompt.classList.add('bg-blue-600', 'text-white');
+                elements.tabPrompt.classList.remove('bg-gray-800', 'text-gray-400');
+                elements.tabStudio.classList.remove('bg-blue-600', 'text-white');
+                elements.tabStudio.classList.add('bg-gray-800', 'text-gray-400');
+                elements.promptPanel.classList.remove('hidden');
+                elements.studioPanel.classList.add('hidden');
             } else {
-                elements.tabAnalyze.classList.add('bg-blue-600', 'text-white');
-                elements.tabAnalyze.classList.remove('bg-gray-800', 'text-gray-400');
-                elements.tabGenerate.classList.remove('bg-blue-600', 'text-white');
-                elements.tabGenerate.classList.add('bg-gray-800', 'text-gray-400');
-                elements.analyzePanel.classList.remove('hidden');
-                elements.generatePanel.classList.add('hidden');
+                elements.tabStudio.classList.add('bg-blue-600', 'text-white');
+                elements.tabStudio.classList.remove('bg-gray-800', 'text-gray-400');
+                elements.tabPrompt.classList.remove('bg-blue-600', 'text-white');
+                elements.tabPrompt.classList.add('bg-gray-800', 'text-gray-400');
+                elements.studioPanel.classList.remove('hidden');
+                elements.promptPanel.classList.add('hidden');
             }
         }
 
@@ -544,6 +706,48 @@
         }
 
         // ==================== Helper ====================
+        function updateSettingsSummary() {
+            const activeModel = getActiveModelConfig();
+            elements.providerSummary.textContent = activeModel.label;
+            elements.modelSummary.textContent = activeModel.generationModel || '尚未設定';
+            elements.apiKeyStatus.textContent = state.apiKey ? '已設定' : '未設定';
+        }
+
+        function applyPromptTemplate(templateKey) {
+            const template = PROMPT_TEMPLATES[templateKey];
+
+            if (!template) return;
+
+            elements.studioPromptInput.value = template;
+            composeStudioPrompt();
+            elements.studioPromptInput.focus();
+            showSuccess('已套用模板');
+        }
+
+        function appendPromptFragment(fragment) {
+            if (!fragment) return;
+
+            const currentValue = elements.studioPromptInput.value.trim();
+            elements.studioPromptInput.value = currentValue ? `${currentValue}, ${fragment}` : fragment;
+            composeStudioPrompt();
+            elements.studioPromptInput.focus();
+        }
+
+        function composeStudioPrompt() {
+            const characterPrompt = elements.characterPromptInput.value.trim();
+            const studioPrompt = elements.studioPromptInput.value.trim();
+            const segments = [characterPrompt, studioPrompt].filter(Boolean);
+            elements.studioFinalPrompt.value = segments.join(', ');
+        }
+
+        function clearStudioWorkflow() {
+            elements.characterPromptInput.value = '';
+            elements.studioPromptInput.value = '';
+            elements.studioFinalPrompt.value = '';
+            clearUploadedImage();
+            elements.characterPromptInput.focus();
+        }
+
         function getActiveModelConfig() {
             return MODEL_CONFIG[state.model] || MODEL_CONFIG.google;
         }
@@ -595,8 +799,10 @@
         }
 
         // ==================== Image Generation ====================
-        async function generateImage() {
-            const prompt = elements.promptInput.value.trim();
+        async function generateImage(source = 'prompt') {
+            const prompt = source === 'studio'
+                ? elements.studioFinalPrompt.value.trim()
+                : elements.promptInput.value.trim();
             const activeModel = getActiveModelConfig();
 
             if (!prompt) {
@@ -729,7 +935,7 @@
 
                 const img = document.createElement('img');
                 img.src = imgSrc;
-                img.className = 'w-full h-auto rounded-xl shadow-lg image-preview transition-transform duration-200';
+                img.className = 'w-full h-auto max-h-[260px] object-cover rounded-xl shadow-lg image-preview transition-transform duration-200';
                 img.alt = `Generated image ${index + 1}`;
 
                 const downloadBtn = document.createElement('button');
@@ -787,6 +993,7 @@
             elements.uploadPlaceholder.classList.remove('hidden');
             elements.clearImageBtn.classList.add('hidden');
             elements.imageInput.value = '';
+            elements.analyzedPrompt.textContent = '';
             elements.analyzedPromptContainer.classList.add('hidden');
         }
 
@@ -866,9 +1073,10 @@
 
         function useAnalyzedPrompt() {
             const prompt = elements.analyzedPrompt.textContent;
-            elements.promptInput.value = prompt;
-            switchTab('generate');
-            showSuccess('已填入 Prompt');
+            const currentValue = elements.characterPromptInput.value.trim();
+            elements.characterPromptInput.value = currentValue ? `${currentValue}, ${prompt}` : prompt;
+            composeStudioPrompt();
+            showSuccess('已套用到人物設定');
         }
 
         // ==================== Download ====================
@@ -898,13 +1106,15 @@
         function showLoading(text) {
             elements.loadingText.textContent = text;
             elements.loadingState.classList.remove('hidden');
-            elements.generateBtn.disabled = true;
+            elements.promptGenerateBtn.disabled = true;
+            elements.studioGenerateBtn.disabled = true;
             elements.analyzeBtn.disabled = true;
         }
 
         function hideLoading() {
             elements.loadingState.classList.add('hidden');
-            elements.generateBtn.disabled = false;
+            elements.promptGenerateBtn.disabled = false;
+            elements.studioGenerateBtn.disabled = false;
             elements.analyzeBtn.disabled = false;
         }
 
