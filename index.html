@@ -918,6 +918,9 @@
         // ==================== Render Image Grid ====================
         function renderImageGrid() {
             const count = state.generatedImages.length;
+            const selectedRatio = elements.aspectRatioSelect.value;
+            const [ratioWidth, ratioHeight] = selectedRatio.split(':').map(Number);
+            const previewAspectRatio = ratioWidth && ratioHeight ? `${ratioWidth} / ${ratioHeight}` : '1 / 1';
 
             // Set grid columns based on image count
             if (count === 1) {
@@ -931,11 +934,12 @@
 
             state.generatedImages.forEach((imgSrc, index) => {
                 const wrapper = document.createElement('div');
-                wrapper.className = 'relative group bg-gray-900 rounded-xl overflow-hidden';
+                wrapper.className = 'relative group bg-gray-950 rounded-xl overflow-hidden border border-gray-700';
+                wrapper.style.aspectRatio = previewAspectRatio;
 
                 const img = document.createElement('img');
                 img.src = imgSrc;
-                img.className = 'w-full h-auto max-h-[260px] object-cover rounded-xl shadow-lg image-preview transition-transform duration-200';
+                img.className = 'w-full h-full object-contain rounded-xl shadow-lg image-preview transition-transform duration-200';
                 img.alt = `Generated image ${index + 1}`;
 
                 const downloadBtn = document.createElement('button');
