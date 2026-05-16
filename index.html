@@ -214,7 +214,7 @@
                         </button>
                         <button id="tabStudio"
                             class="tab-btn flex-1 py-2.5 px-4 rounded-xl font-medium transition-all bg-gray-800 text-gray-400 hover:bg-gray-700 text-sm">
-                            B. 攝影棚工作流
+                            B. 圖片反推
                         </button>
                     </div>
 
@@ -254,117 +254,55 @@
                         </div>
                     </div>
 
-                    <!-- Studio Workflow Panel -->
+                    <!-- Image-to-Prompt Panel -->
                     <div id="studioPanel" class="space-y-4 hidden">
-                        <div class="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                        <div class="grid grid-cols-1 xl:grid-cols-[0.95fr_1.05fr] gap-4">
                             <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700 space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">人物專屬 Prompt</label>
-                                    <textarea id="characterPromptInput" rows="5" placeholder="貼上人物專屬 Prompt，例如角色外型、服裝、髮型、辨識特徵..."
-                                        class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
+                                    <p class="text-sm font-medium text-gray-200">上傳參考圖片</p>
+                                    <p class="text-xs text-gray-500 mt-1">上傳後可分析成可再生成的 Prompt。</p>
                                 </div>
 
                                 <div>
                                     <div class="flex items-center justify-between mb-2">
-                                        <label class="block text-sm font-medium text-gray-300">人物參考圖片</label>
+                                        <label class="block text-sm font-medium text-gray-300">圖片來源</label>
                                         <button id="clearImageBtn"
                                             class="text-xs text-gray-400 hover:text-red-400 transition-colors hidden">
                                             清除圖片
                                         </button>
                                     </div>
                                     <div id="dropZone"
-                                        class="border-2 border-dashed border-gray-600 rounded-xl p-4 text-center hover:border-blue-500 transition-colors cursor-pointer bg-gray-900/60">
+                                        class="border-2 border-dashed border-gray-600 rounded-xl p-5 text-center hover:border-blue-500 transition-colors cursor-pointer bg-gray-900/60">
                                         <input type="file" id="imageInput" accept="image/*" class="hidden">
                                         <div id="uploadPlaceholder">
-                                            <svg class="w-8 h-8 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor"
+                                            <svg class="w-10 h-10 mx-auto text-gray-500 mb-2" fill="none" stroke="currentColor"
                                                 viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                             </svg>
-                                            <p class="text-gray-400 text-sm">點擊或拖放人物圖片</p>
+                                            <p class="text-gray-400 text-sm">點擊或拖放圖片</p>
                                             <p class="text-xs text-gray-500 mt-1">JPG、PNG、WebP</p>
                                         </div>
-                                        <img id="uploadPreview" class="max-h-32 mx-auto rounded-lg hidden">
-                                    </div>
-                                    <div class="flex justify-end mt-3">
-                                        <button id="analyzeBtn"
-                                            class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-2.5 px-4 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
-                                            <span>分析圖片</span>
-                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                            </svg>
-                                        </button>
+                                        <img id="uploadPreview" class="max-h-48 mx-auto rounded-lg hidden">
                                     </div>
                                 </div>
-                            </div>
 
-                            <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700 space-y-4">
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-300 mb-2">攝影棚方向 Prompt</label>
-                                    <textarea id="studioPromptInput" rows="5" placeholder="補上你這次想測的攝影方向，例如棚拍風格、光線、構圖、情緒..."
+                                    <label class="block text-sm font-medium text-gray-300 mb-2">補充指令</label>
+                                    <textarea id="analysisInstructionInput" rows="4"
+                                        placeholder="可選填，例如：請偏重分析服裝與鏡頭，並用更適合 Gemini 生圖的寫法。"
                                         class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
                                 </div>
 
-                                <div class="rounded-xl border border-gray-700 bg-gray-900/60 p-4">
-                                    <p class="text-sm font-medium text-gray-200">模板分類</p>
-                                    <p class="text-xs text-gray-500 mt-1">先套一個方向，再用快速加詞微調。</p>
-                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-3">
-                                        <button type="button" data-template="fashionEditorial" class="prompt-template-btn text-left rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors">時尚形象</button>
-                                        <button type="button" data-template="cinematicPortrait" class="prompt-template-btn text-left rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors">電影感人像</button>
-                                        <button type="button" data-template="beautyCloseup" class="prompt-template-btn text-left rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors">美妝特寫</button>
-                                        <button type="button" data-template="productHero" class="prompt-template-btn text-left rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors">產品主視覺</button>
-                                        <button type="button" data-template="interiorMood" class="prompt-template-btn text-left rounded-lg border border-gray-700 bg-gray-800 hover:bg-gray-700 px-3 py-2 text-sm text-gray-200 transition-colors sm:col-span-2">空間氛圍</button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <div class="grid grid-cols-1 lg:grid-cols-[1.3fr_0.9fr] gap-4">
-                            <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700 space-y-4">
-                                <div>
-                                    <p class="text-sm font-medium text-gray-200">快速加詞</p>
-                                    <p class="text-xs text-gray-500 mt-1">這些標籤會加到「攝影棚方向 Prompt」。</p>
-                                </div>
-
-                                <div>
-                                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">構圖</p>
-                                    <div class="flex flex-wrap gap-2">
-                                        <button type="button" data-fragment="close-up portrait" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">特寫</button>
-                                        <button type="button" data-fragment="half-body fashion portrait" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">半身</button>
-                                        <button type="button" data-fragment="full-body editorial shot" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">全身</button>
-                                        <button type="button" data-fragment="hero product composition" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">主視覺</button>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">鏡頭</p>
-                                    <div class="flex flex-wrap gap-2">
-                                        <button type="button" data-fragment="35mm lens" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">35mm</button>
-                                        <button type="button" data-fragment="50mm lens" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">50mm</button>
-                                        <button type="button" data-fragment="85mm lens" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">85mm</button>
-                                        <button type="button" data-fragment="shallow depth of field" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">淺景深</button>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">光線</p>
-                                    <div class="flex flex-wrap gap-2">
-                                        <button type="button" data-fragment="soft diffused studio lighting" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">柔光棚燈</button>
-                                        <button type="button" data-fragment="dramatic rim lighting" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">輪廓光</button>
-                                        <button type="button" data-fragment="natural window light" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">窗光</button>
-                                        <button type="button" data-fragment="controlled specular highlights" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">高光控制</button>
-                                    </div>
-                                </div>
-
-                                <div>
-                                    <p class="text-xs uppercase tracking-wide text-gray-500 mb-2">氛圍</p>
-                                    <div class="flex flex-wrap gap-2">
-                                        <button type="button" data-fragment="clean luxury aesthetic" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">奢華感</button>
-                                        <button type="button" data-fragment="moody cinematic atmosphere" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">電影感</button>
-                                        <button type="button" data-fragment="minimal premium composition" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">極簡感</button>
-                                        <button type="button" data-fragment="high-end commercial polish" class="prompt-fragment-btn rounded-full bg-gray-900 hover:bg-gray-700 border border-gray-700 px-3 py-1.5 text-xs text-gray-200 transition-colors">商業感</button>
-                                    </div>
+                                <div class="flex justify-end">
+                                    <button id="analyzeBtn"
+                                        class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
+                                        <span>分析圖片</span>
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </button>
                                 </div>
                             </div>
 
@@ -372,37 +310,25 @@
                                 <div id="analyzedPromptContainer"
                                     class="bg-gray-800 rounded-2xl p-5 border border-gray-700 hidden">
                                     <div class="flex items-center justify-between mb-3">
-                                        <label class="text-sm font-medium text-gray-300">圖片分析結果</label>
+                                        <div>
+                                            <label class="text-sm font-medium text-gray-300">反推 Prompt</label>
+                                            <p class="text-xs text-gray-500 mt-1">可直接套用到生成區，或立即生成。</p>
+                                        </div>
                                         <button id="usePromptBtn"
                                             class="text-sm text-blue-400 hover:text-blue-300 transition-colors">
-                                            套用到人物設定
+                                            套用到生成區
                                         </button>
                                     </div>
-                                    <p id="analyzedPrompt" class="text-gray-200 leading-relaxed text-sm"></p>
-                                </div>
-
-                                <div class="bg-gray-800 rounded-2xl p-5 border border-gray-700 space-y-4">
-                                    <div class="flex items-center justify-between">
-                                        <div>
-                                            <p class="text-sm font-medium text-gray-200">最終 Prompt</p>
-                                            <p class="text-xs text-gray-500 mt-1">由人物設定與攝影方向組合而成。</p>
-                                        </div>
-                                        <button id="composePromptBtn"
-                                            class="text-sm px-3 py-2 rounded-lg bg-gray-700 hover:bg-gray-600 text-white transition-colors">
-                                            重新組合
-                                        </button>
-                                    </div>
-                                    <textarea id="studioFinalPrompt" rows="11"
-                                        class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"
-                                        placeholder="人物設定與攝影方向會在這裡合併顯示..." readonly></textarea>
-                                    <div class="flex items-center justify-between gap-3">
-                                        <button id="clearStudioBtn"
+                                    <textarea id="analyzedPrompt" rows="14"
+                                        class="w-full bg-gray-900 border border-gray-700 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition resize-none"></textarea>
+                                    <div class="flex items-center justify-between gap-3 mt-4">
+                                        <button id="clearAnalyzeResultBtn"
                                             class="px-4 py-2.5 rounded-xl bg-gray-700 hover:bg-gray-600 text-white text-sm transition-colors">
-                                            清除工作流
+                                            清除結果
                                         </button>
-                                        <button id="studioGenerateBtn"
+                                        <button id="analyzedGenerateBtn"
                                             class="bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 text-white font-semibold py-2.5 px-5 rounded-xl transition-all duration-200 flex items-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed text-sm">
-                                            <span>生成圖像</span>
+                                            <span>以此生成</span>
                                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                                     d="M13 10V3L4 14h7v7l9-11h-7z" />
@@ -523,14 +449,6 @@
             }
         };
 
-        const PROMPT_TEMPLATES = {
-            fashionEditorial: "A high-end fashion editorial portrait, confident model, luxury styling, clean composition, premium commercial photography, refined skin texture, subtle cinematic color grading, highly detailed, professional studio quality",
-            cinematicPortrait: "A cinematic portrait of the subject, dramatic mood, layered depth, realistic skin texture, subtle film grain, strong focal separation, polished color grading, premium photography direction, highly detailed",
-            beautyCloseup: "A beauty close-up portrait, flawless makeup detail, luminous skin, clean beauty campaign direction, macro-level facial detail, soft premium lighting, elegant composition, high-end commercial photography",
-            productHero: "A premium product hero shot, luxury commercial photography, precise reflections, carefully controlled highlights, clean backdrop, sharp details, polished advertising aesthetic, highly refined presentation",
-            interiorMood: "A sophisticated interior lifestyle photograph, curated set design, balanced composition, tasteful materials, natural depth, editorial decor direction, soft realistic light, premium visual storytelling"
-        };
-
         const state = {
             apiKey: localStorage.getItem('dll_pic_pro_api_key') || '',
             model: localStorage.getItem('dll_pic_pro_model') || 'google',
@@ -562,22 +480,18 @@
             imageCountSelect: document.getElementById('imageCount'),
             promptGenerateBtn: document.getElementById('promptGenerateBtn'),
 
-            characterPromptInput: document.getElementById('characterPromptInput'),
-            studioPromptInput: document.getElementById('studioPromptInput'),
-            studioFinalPrompt: document.getElementById('studioFinalPrompt'),
-            composePromptBtn: document.getElementById('composePromptBtn'),
-            clearStudioBtn: document.getElementById('clearStudioBtn'),
-            studioGenerateBtn: document.getElementById('studioGenerateBtn'),
-
             dropZone: document.getElementById('dropZone'),
             imageInput: document.getElementById('imageInput'),
             uploadPlaceholder: document.getElementById('uploadPlaceholder'),
             uploadPreview: document.getElementById('uploadPreview'),
             clearImageBtn: document.getElementById('clearImageBtn'),
+            analysisInstructionInput: document.getElementById('analysisInstructionInput'),
             analyzeBtn: document.getElementById('analyzeBtn'),
             analyzedPromptContainer: document.getElementById('analyzedPromptContainer'),
             analyzedPrompt: document.getElementById('analyzedPrompt'),
             usePromptBtn: document.getElementById('usePromptBtn'),
+            clearAnalyzeResultBtn: document.getElementById('clearAnalyzeResultBtn'),
+            analyzedGenerateBtn: document.getElementById('analyzedGenerateBtn'),
 
             loadingState: document.getElementById('loadingState'),
             loadingText: document.getElementById('loadingText'),
@@ -603,7 +517,6 @@
             elements.modelSelect.value = state.model;
             elements.apiKeyInput.value = state.apiKey;
             updateSettingsSummary();
-            composeStudioPrompt();
 
             // Event listeners
             setupEventListeners();
@@ -625,19 +538,9 @@
             elements.tabStudio.addEventListener('click', () => switchTab('studio'));
 
             // Generate
-            elements.promptGenerateBtn.addEventListener('click', () => generateImage('prompt'));
+            elements.promptGenerateBtn.addEventListener('click', generateImage);
             elements.clearPromptBtn.addEventListener('click', clearPrompt);
-            elements.studioGenerateBtn.addEventListener('click', () => generateImage('studio'));
-            elements.composePromptBtn.addEventListener('click', composeStudioPrompt);
-            elements.clearStudioBtn.addEventListener('click', clearStudioWorkflow);
-            document.querySelectorAll('.prompt-template-btn').forEach((button) => {
-                button.addEventListener('click', () => applyPromptTemplate(button.dataset.template));
-            });
-            document.querySelectorAll('.prompt-fragment-btn').forEach((button) => {
-                button.addEventListener('click', () => appendPromptFragment(button.dataset.fragment));
-            });
-            elements.characterPromptInput.addEventListener('input', composeStudioPrompt);
-            elements.studioPromptInput.addEventListener('input', composeStudioPrompt);
+            elements.analyzedGenerateBtn.addEventListener('click', generateImageFromAnalyzedPrompt);
 
             // Image upload
             elements.dropZone.addEventListener('click', () => elements.imageInput.click());
@@ -653,6 +556,7 @@
             elements.clearImageBtn.addEventListener('click', clearUploadedImage);
             elements.analyzeBtn.addEventListener('click', analyzeImage);
             elements.usePromptBtn.addEventListener('click', useAnalyzedPrompt);
+            elements.clearAnalyzeResultBtn.addEventListener('click', clearAnalyzedPrompt);
 
             // Download
             elements.downloadAllBtn.addEventListener('click', downloadAllImages);
@@ -720,41 +624,6 @@
             elements.apiKeyStatus.textContent = state.apiKey ? '已設定' : '未設定';
         }
 
-        function applyPromptTemplate(templateKey) {
-            const template = PROMPT_TEMPLATES[templateKey];
-
-            if (!template) return;
-
-            elements.studioPromptInput.value = template;
-            composeStudioPrompt();
-            elements.studioPromptInput.focus();
-            showSuccess('已套用模板');
-        }
-
-        function appendPromptFragment(fragment) {
-            if (!fragment) return;
-
-            const currentValue = elements.studioPromptInput.value.trim();
-            elements.studioPromptInput.value = currentValue ? `${currentValue}, ${fragment}` : fragment;
-            composeStudioPrompt();
-            elements.studioPromptInput.focus();
-        }
-
-        function composeStudioPrompt() {
-            const characterPrompt = elements.characterPromptInput.value.trim();
-            const studioPrompt = elements.studioPromptInput.value.trim();
-            const segments = [characterPrompt, studioPrompt].filter(Boolean);
-            elements.studioFinalPrompt.value = segments.join(', ');
-        }
-
-        function clearStudioWorkflow() {
-            elements.characterPromptInput.value = '';
-            elements.studioPromptInput.value = '';
-            elements.studioFinalPrompt.value = '';
-            clearUploadedImage();
-            elements.characterPromptInput.focus();
-        }
-
         function getActiveModelConfig() {
             return MODEL_CONFIG[state.model] || MODEL_CONFIG.google;
         }
@@ -806,10 +675,8 @@
         }
 
         // ==================== Image Generation ====================
-        async function generateImage(source = 'prompt') {
-            const prompt = source === 'studio'
-                ? elements.studioFinalPrompt.value.trim()
-                : elements.promptInput.value.trim();
+        async function generateImage() {
+            const prompt = elements.promptInput.value.trim();
             const activeModel = getActiveModelConfig();
 
             if (!prompt) {
@@ -994,6 +861,7 @@
                 elements.uploadPreview.classList.remove('hidden');
                 elements.uploadPlaceholder.classList.add('hidden');
                 elements.clearImageBtn.classList.remove('hidden');
+                clearAnalyzedPrompt();
             };
             reader.readAsDataURL(file);
         }
@@ -1004,12 +872,17 @@
             elements.uploadPlaceholder.classList.remove('hidden');
             elements.clearImageBtn.classList.add('hidden');
             elements.imageInput.value = '';
-            elements.analyzedPrompt.textContent = '';
+            clearAnalyzedPrompt();
+        }
+
+        function clearAnalyzedPrompt() {
+            elements.analyzedPrompt.value = '';
             elements.analyzedPromptContainer.classList.add('hidden');
         }
 
         async function analyzeImage() {
             const activeModel = getActiveModelConfig();
+            const instruction = elements.analysisInstructionInput.value.trim();
 
             if (!state.uploadedImage) {
                 showError('請先上傳圖片');
@@ -1049,7 +922,9 @@
                                         }
                                     },
                                     {
-                                        text: "Analyze this image and generate a detailed prompt that could be used to recreate this image with an AI image generator. Focus on: subject, style, composition, colors, lighting, mood, and any specific artistic techniques. Output only the prompt in English, nothing else."
+                                        text: instruction
+                                            ? `Analyze this image and generate a detailed prompt that could be used to recreate this image with an AI image generator. Focus on: subject, style, composition, colors, lighting, mood, and any specific artistic techniques. Output only the prompt in English, nothing else. Additional instruction: ${instruction}`
+                                            : "Analyze this image and generate a detailed prompt that could be used to recreate this image with an AI image generator. Focus on: subject, style, composition, colors, lighting, mood, and any specific artistic techniques. Output only the prompt in English, nothing else."
                                     }
                                 ]
                             }]
@@ -1065,7 +940,7 @@
                 const promptText = data.candidates?.[0]?.content?.parts?.[0]?.text;
 
                 if (promptText) {
-                    elements.analyzedPrompt.textContent = promptText;
+                    elements.analyzedPrompt.value = promptText;
                     elements.analyzedPromptContainer.classList.remove('hidden');
                     showSuccess('圖片分析完成！');
                 } else {
@@ -1083,11 +958,28 @@
         }
 
         function useAnalyzedPrompt() {
-            const prompt = elements.analyzedPrompt.textContent;
-            const currentValue = elements.characterPromptInput.value.trim();
-            elements.characterPromptInput.value = currentValue ? `${currentValue}, ${prompt}` : prompt;
-            composeStudioPrompt();
-            showSuccess('已套用到人物設定');
+            const prompt = elements.analyzedPrompt.value.trim();
+            if (!prompt) {
+                showError('目前沒有可套用的 Prompt');
+                return;
+            }
+
+            elements.promptInput.value = prompt;
+            switchTab('prompt');
+            elements.promptInput.focus();
+            showSuccess('已套用到生成區');
+        }
+
+        function generateImageFromAnalyzedPrompt() {
+            const prompt = elements.analyzedPrompt.value.trim();
+            if (!prompt) {
+                showError('目前沒有可生成的 Prompt');
+                return;
+            }
+
+            elements.promptInput.value = prompt;
+            switchTab('prompt');
+            generateImage();
         }
 
         // ==================== Download ====================
@@ -1118,14 +1010,14 @@
             elements.loadingText.textContent = text;
             elements.loadingState.classList.remove('hidden');
             elements.promptGenerateBtn.disabled = true;
-            elements.studioGenerateBtn.disabled = true;
+            elements.analyzedGenerateBtn.disabled = true;
             elements.analyzeBtn.disabled = true;
         }
 
         function hideLoading() {
             elements.loadingState.classList.add('hidden');
             elements.promptGenerateBtn.disabled = false;
-            elements.studioGenerateBtn.disabled = false;
+            elements.analyzedGenerateBtn.disabled = false;
             elements.analyzeBtn.disabled = false;
         }
 
