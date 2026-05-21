@@ -857,7 +857,7 @@
                 img.alt = `Generated image ${index + 1}`;
 
                 const downloadBtn = document.createElement('button');
-                downloadBtn.className = 'absolute bottom-3 right-3 bg-gray-800/90 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200';
+                downloadBtn.className = 'bg-gray-800/90 hover:bg-blue-600 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors duration-200';
                 downloadBtn.innerHTML = `
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/>
@@ -866,8 +866,23 @@
                 `;
                 downloadBtn.onclick = () => downloadSingleImage(imgSrc, index);
 
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'bg-gray-800/90 hover:bg-red-600 text-white px-3 py-2 rounded-lg text-sm flex items-center gap-2 transition-colors duration-200';
+                deleteBtn.innerHTML = `
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                    </svg>
+                    刪除
+                `;
+                deleteBtn.onclick = () => removeGeneratedImage(index);
+
+                const actionBar = document.createElement('div');
+                actionBar.className = 'absolute bottom-3 right-3 flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200';
+
                 wrapper.appendChild(img);
-                wrapper.appendChild(downloadBtn);
+                actionBar.appendChild(deleteBtn);
+                actionBar.appendChild(downloadBtn);
+                wrapper.appendChild(actionBar);
                 elements.imageGrid.appendChild(wrapper);
             });
 
@@ -876,6 +891,24 @@
             elements.downloadAllBtn.classList.remove('hidden');
             elements.imageCountBadge.textContent = `${count} 張`;
             elements.imageCountBadge.classList.remove('hidden');
+        }
+
+        function removeGeneratedImage(index) {
+            if (index < 0 || index >= state.generatedImages.length) return;
+
+            state.generatedImages.splice(index, 1);
+
+            if (state.generatedImages.length === 0) {
+                elements.imageGrid.innerHTML = '';
+                elements.imageGrid.classList.add('hidden');
+                elements.downloadAllBtn.classList.add('hidden');
+                elements.imageCountBadge.classList.add('hidden');
+                elements.previewPlaceholder.classList.remove('hidden');
+            } else {
+                renderImageGrid();
+            }
+
+            showSuccess('已刪除預覽圖');
         }
 
         // ==================== Image Analysis ====================
