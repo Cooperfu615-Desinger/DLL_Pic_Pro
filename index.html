@@ -106,7 +106,8 @@
                         class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
                         <option value="google">Google Gemini 2.5 Flash / Image</option>
                         <option value="google31image">Google Gemini 3.1 Flash Image (實驗)</option>
-                        <option value="grok">xAI Grok Imagine</option>
+                        <option value="grokStandard">xAI Grok Imagine Standard ($0.02 / 張)</option>
+                        <option value="grok">xAI Grok Imagine Quality ($0.05 起 / 張)</option>
                     </select>
                 </div>
 
@@ -181,7 +182,7 @@
                             </button>
                         </div>
 
-                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
+                        <div class="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-4 mt-4">
                             <div>
                                 <label class="block text-sm font-medium text-gray-300 mb-2">圖片比例</label>
                                 <select id="aspectRatio"
@@ -201,6 +202,14 @@
                                     <option value="2">2 張</option>
                                     <option value="3">3 張</option>
                                     <option value="4">4 張</option>
+                                </select>
+                            </div>
+                            <div id="xaiResolutionControl" class="hidden">
+                                <label class="block text-sm font-medium text-gray-300 mb-2">xAI 解析度</label>
+                                <select id="xaiResolution"
+                                    class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-2.5 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition text-sm">
+                                    <option value="1k" selected>1K</option>
+                                    <option value="2k">2K</option>
                                 </select>
                             </div>
                         </div>
@@ -467,8 +476,14 @@
                 generationModel: 'gemini-3.1-flash-image-preview',
                 analysisModel: 'gemini-2.5-flash'
             },
+            grokStandard: {
+                label: 'xAI Grok Imagine Standard',
+                provider: 'xai',
+                generationModel: 'grok-imagine-image',
+                analysisModel: 'grok-4.3'
+            },
             grok: {
-                label: 'xAI Grok Imagine',
+                label: 'xAI Grok Imagine Quality',
                 provider: 'xai',
                 generationModel: 'grok-imagine-image-quality',
                 analysisModel: 'grok-4.3'
@@ -483,6 +498,7 @@
                 xai: localStorage.getItem('dll_pic_pro_api_key_xai') || ''
             },
             model: localStorage.getItem('dll_pic_pro_model') || 'google',
+            xaiResolution: localStorage.getItem('dll_pic_pro_xai_resolution') || '1k',
             uploadedImage: null,
             generatedImages: [], // Changed from single image to array
             analysisResult: {
@@ -515,6 +531,8 @@
             clearPromptBtn: document.getElementById('clearPromptBtn'),
             aspectRatioSelect: document.getElementById('aspectRatio'),
             imageCountSelect: document.getElementById('imageCount'),
+            xaiResolutionControl: document.getElementById('xaiResolutionControl'),
+            xaiResolutionSelect: document.getElementById('xaiResolution'),
             promptGenerateBtn: document.getElementById('promptGenerateBtn'),
 
             dropZone: document.getElementById('dropZone'),
@@ -559,7 +577,9 @@
             // Load saved settings
             elements.modelSelect.value = state.model;
             elements.apiKeyInput.value = getActiveApiKey();
+            elements.xaiResolutionSelect.value = state.xaiResolution;
             updateSettingsSummary();
+            updateProviderControls();
 
             // Event listeners
             setupEventListeners();
@@ -571,6 +591,7 @@
             elements.openSettingsPanelBtn.addEventListener('click', showSettingsModal);
             elements.saveSettingsBtn.addEventListener('click', saveSettings);
             elements.modelSelect.addEventListener('change', handleSettingsModelChange);
+            elements.xaiResolutionSelect.addEventListener('change', saveXaiResolution);
             elements.settingsModal.addEventListener('click', (e) => {
                 if (e.target === elements.settingsModal && getActiveApiKey()) {
                     hideSettingsModal();
@@ -641,12 +662,19 @@
 
             hideSettingsModal();
             updateSettingsSummary();
+            updateProviderControls();
             showSuccess('設定已儲存');
         }
 
         function handleSettingsModelChange() {
             const selectedConfig = MODEL_CONFIG[elements.modelSelect.value] || MODEL_CONFIG.google;
             elements.apiKeyInput.value = state.apiKeys[selectedConfig.provider] || '';
+        }
+
+        function saveXaiResolution() {
+            state.xaiResolution = elements.xaiResolutionSelect.value;
+            localStorage.setItem('dll_pic_pro_xai_resolution', state.xaiResolution);
+            updateSettingsSummary();
         }
 
         // ==================== Tab Navigation ====================
@@ -678,8 +706,15 @@
         function updateSettingsSummary() {
             const activeModel = getActiveModelConfig();
             elements.providerSummary.textContent = activeModel.label;
-            elements.modelSummary.textContent = activeModel.generationModel || '尚未設定';
+            elements.modelSummary.textContent = activeModel.provider === 'xai'
+                ? `${activeModel.generationModel} / ${state.xaiResolution}`
+                : activeModel.generationModel || '尚未設定';
             elements.apiKeyStatus.textContent = getActiveApiKey() ? '已設定' : '未設定';
+        }
+
+        function updateProviderControls() {
+            const activeModel = getActiveModelConfig();
+            elements.xaiResolutionControl.classList.toggle('hidden', activeModel.provider !== 'xai');
         }
 
         function getActiveModelConfig() {
@@ -807,6 +842,7 @@
                         prompt,
                         n: imageCount,
                         aspect_ratio: selectedRatio,
+                        resolution: state.xaiResolution,
                         response_format: 'b64_json'
                     })
                 }
