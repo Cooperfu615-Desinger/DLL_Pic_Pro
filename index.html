@@ -106,7 +106,7 @@
                         class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
                         <option value="google">Google Gemini 2.5 Flash / Image</option>
                         <option value="google31image">Google Gemini 3.1 Flash Image (實驗)</option>
-                        <option value="grok">xAI Grok (預留)</option>
+                        <option value="grok">xAI Grok Imagine</option>
                     </select>
                 </div>
 
@@ -114,7 +114,7 @@
                     <label class="block text-sm font-medium text-gray-300 mb-2">API Key</label>
                     <input type="password" id="apiKeyInput" placeholder="貼上您的 API Key..."
                         class="w-full bg-gray-700 border border-gray-600 rounded-xl px-4 py-3 text-white placeholder-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-transparent outline-none transition">
-                    <p class="text-xs text-gray-500 mt-2">🔒 Key 僅儲存於本地瀏覽器，不會上傳至伺服器</p>
+                    <p class="text-xs text-gray-500 mt-2">Key 會依 provider 分開儲存在本地瀏覽器，不會上傳至伺服器</p>
                 </div>
 
                 <button id="saveSettingsBtn"
@@ -457,23 +457,31 @@
         const MODEL_CONFIG = {
             google: {
                 label: 'Google Gemini',
+                provider: 'google',
                 generationModel: 'gemini-2.5-flash-image',
                 analysisModel: 'gemini-2.5-flash'
             },
             google31image: {
                 label: 'Google Gemini (實驗)',
+                provider: 'google',
                 generationModel: 'gemini-3.1-flash-image-preview',
                 analysisModel: 'gemini-2.5-flash'
             },
             grok: {
-                label: 'xAI Grok',
-                generationModel: null,
-                analysisModel: null
+                label: 'xAI Grok Imagine',
+                provider: 'xai',
+                generationModel: 'grok-imagine-image-quality',
+                analysisModel: 'grok-4.3'
             }
         };
 
+        const LEGACY_API_KEY = localStorage.getItem('dll_pic_pro_api_key') || '';
+
         const state = {
-            apiKey: localStorage.getItem('dll_pic_pro_api_key') || '',
+            apiKeys: {
+                google: localStorage.getItem('dll_pic_pro_api_key_google') || LEGACY_API_KEY,
+                xai: localStorage.getItem('dll_pic_pro_api_key_xai') || ''
+            },
             model: localStorage.getItem('dll_pic_pro_model') || 'google',
             uploadedImage: null,
             generatedImages: [], // Changed from single image to array
@@ -544,13 +552,13 @@
         // ==================== Initialization ====================
         function init() {
             // Check if API key exists
-            if (!state.apiKey) {
+            if (!getActiveApiKey()) {
                 showSettingsModal();
             }
 
             // Load saved settings
             elements.modelSelect.value = state.model;
-            elements.apiKeyInput.value = state.apiKey;
+            elements.apiKeyInput.value = getActiveApiKey();
             updateSettingsSummary();
 
             // Event listeners
@@ -562,8 +570,9 @@
             elements.openSettingsBtn.addEventListener('click', showSettingsModal);
             elements.openSettingsPanelBtn.addEventListener('click', showSettingsModal);
             elements.saveSettingsBtn.addEventListener('click', saveSettings);
+            elements.modelSelect.addEventListener('change', handleSettingsModelChange);
             elements.settingsModal.addEventListener('click', (e) => {
-                if (e.target === elements.settingsModal && state.apiKey) {
+                if (e.target === elements.settingsModal && getActiveApiKey()) {
                     hideSettingsModal();
                 }
             });
@@ -604,6 +613,8 @@
 
         // ==================== Settings ====================
         function showSettingsModal() {
+            elements.modelSelect.value = state.model;
+            elements.apiKeyInput.value = getActiveApiKey();
             elements.settingsModal.classList.remove('hidden');
         }
 
@@ -614,21 +625,28 @@
         function saveSettings() {
             const apiKey = elements.apiKeyInput.value.trim();
             const model = elements.modelSelect.value;
+            const modelConfig = MODEL_CONFIG[model] || MODEL_CONFIG.google;
+            const provider = modelConfig.provider;
 
             if (!apiKey) {
                 showError('請輸入 API Key');
                 return;
             }
 
-            state.apiKey = apiKey;
+            state.apiKeys[provider] = apiKey;
             state.model = model;
 
-            localStorage.setItem('dll_pic_pro_api_key', apiKey);
+            localStorage.setItem(`dll_pic_pro_api_key_${provider}`, apiKey);
             localStorage.setItem('dll_pic_pro_model', model);
 
             hideSettingsModal();
             updateSettingsSummary();
             showSuccess('設定已儲存');
+        }
+
+        function handleSettingsModelChange() {
+            const selectedConfig = MODEL_CONFIG[elements.modelSelect.value] || MODEL_CONFIG.google;
+            elements.apiKeyInput.value = state.apiKeys[selectedConfig.provider] || '';
         }
 
         // ==================== Tab Navigation ====================
@@ -661,15 +679,20 @@
             const activeModel = getActiveModelConfig();
             elements.providerSummary.textContent = activeModel.label;
             elements.modelSummary.textContent = activeModel.generationModel || '尚未設定';
-            elements.apiKeyStatus.textContent = state.apiKey ? '已設定' : '未設定';
+            elements.apiKeyStatus.textContent = getActiveApiKey() ? '已設定' : '未設定';
         }
 
         function getActiveModelConfig() {
             return MODEL_CONFIG[state.model] || MODEL_CONFIG.google;
         }
 
-        function buildApiUrl(modelName) {
-            return `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${state.apiKey}`;
+        function getActiveApiKey() {
+            const activeModel = getActiveModelConfig();
+            return state.apiKeys[activeModel.provider] || '';
+        }
+
+        function buildGeminiApiUrl(modelName) {
+            return `https://generativelanguage.googleapis.com/v1beta/models/${modelName}:generateContent?key=${getActiveApiKey()}`;
         }
 
         async function parseApiError(response) {
@@ -714,6 +737,97 @@
             }
         }
 
+        async function generateGeminiImages(activeModel, prompt, selectedRatio, imageCount) {
+            const fetchPromises = Array.from({ length: imageCount }, () =>
+                fetchWithTimeout(
+                    buildGeminiApiUrl(activeModel.generationModel),
+                    {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({
+                            contents: [{
+                                parts: [{ text: prompt }]
+                            }],
+                            generationConfig: {
+                                responseModalities: ['TEXT', 'IMAGE'],
+                                imageConfig: {
+                                    aspectRatio: selectedRatio
+                                }
+                            }
+                        })
+                    }
+                )
+            );
+
+            const responses = await Promise.all(fetchPromises);
+            const images = [];
+
+            for (let i = 0; i < responses.length; i++) {
+                const response = responses[i];
+                if (!response.ok) {
+                    const errorMessage = await parseApiError(response);
+                    console.error(`[Debug] Request ${i + 1} failed with status ${response.status}:`, errorMessage);
+                    showError(errorMessage);
+                    continue;
+                }
+
+                const data = await response.json();
+                const parts = data.candidates?.[0]?.content?.parts || [];
+                const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
+
+                if (imagePart) {
+                    images.push(`data:${imagePart.inlineData.mimeType};base64,${imagePart.inlineData.data}`);
+                    continue;
+                }
+
+                console.log(`[Debug] Request ${i + 1} - Full API Response:`, JSON.stringify(data, null, 2));
+                const textPart = parts.find(p => p.text);
+                if (textPart) {
+                    console.log(`[Debug] Request ${i + 1} - Model Response Text:`, textPart.text);
+                    showError(`模型回應: ${textPart.text}`);
+                } else if (data.promptFeedback?.blockReason) {
+                    showError(`請求被模型阻擋：${data.promptFeedback.blockReason}`);
+                }
+            }
+
+            return images;
+        }
+
+        async function generateXaiImages(activeModel, prompt, selectedRatio, imageCount) {
+            const response = await fetchWithTimeout(
+                'https://api.x.ai/v1/images/generations',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getActiveApiKey()}`
+                    },
+                    body: JSON.stringify({
+                        model: activeModel.generationModel,
+                        prompt,
+                        n: imageCount,
+                        aspect_ratio: selectedRatio,
+                        response_format: 'b64_json'
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(await parseApiError(response));
+            }
+
+            const data = await response.json();
+            const images = data.data
+                ?.map(image => image.b64_json ? `data:image/png;base64,${image.b64_json}` : image.url)
+                .filter(Boolean) || [];
+
+            if (images.length === 0) {
+                console.log('[Debug] xAI image generation response:', JSON.stringify(data, null, 2));
+            }
+
+            return images;
+        }
+
         // ==================== Image Generation ====================
         async function generateImage() {
             const prompt = elements.promptInput.value.trim();
@@ -724,7 +838,7 @@
                 return;
             }
 
-            if (!state.apiKey) {
+            if (!getActiveApiKey()) {
                 showError('請先設置 API Key');
                 showSettingsModal();
                 return;
@@ -750,63 +864,9 @@
             state.generatedImages = [];
 
             try {
-                // Create array of fetch promises for parallel requests
-                const fetchPromises = Array.from({ length: imageCount }, () =>
-                    fetchWithTimeout(
-                        buildApiUrl(activeModel.generationModel),
-                        {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({
-                                contents: [{
-                                    parts: [{ text: prompt }]
-                                }],
-                                generationConfig: {
-                                    responseModalities: ['TEXT', 'IMAGE'],
-                                    imageConfig: {
-                                        aspectRatio: selectedRatio
-                                    }
-                                }
-                            })
-                        }
-                    )
-                );
-
-                // Wait for all requests to complete
-                const responses = await Promise.all(fetchPromises);
-
-                // Process all responses
-                for (let i = 0; i < responses.length; i++) {
-                    const response = responses[i];
-                    if (!response.ok) {
-                        const errorMessage = await parseApiError(response);
-                        console.error(`[Debug] Request ${i + 1} failed with status ${response.status}:`, errorMessage);
-                        showError(errorMessage);
-                        continue;
-                    }
-
-                    const data = await response.json();
-                    const parts = data.candidates?.[0]?.content?.parts || [];
-                    const imagePart = parts.find(p => p.inlineData?.mimeType?.startsWith('image/'));
-
-                    if (imagePart) {
-                        const base64Data = imagePart.inlineData.data;
-                        const mimeType = imagePart.inlineData.mimeType;
-                        state.generatedImages.push(`data:${mimeType};base64,${base64Data}`);
-                    } else {
-                        // Debug: Log full response if no image found
-                        console.log(`[Debug] Request ${i + 1} - Full API Response:`, JSON.stringify(data, null, 2));
-
-                        // Check if model returned text instead of image
-                        const textPart = parts.find(p => p.text);
-                        if (textPart) {
-                            console.log(`[Debug] Request ${i + 1} - Model Response Text:`, textPart.text);
-                            showError(`模型回應: ${textPart.text}`);
-                        } else if (data.promptFeedback?.blockReason) {
-                            showError(`請求被模型阻擋：${data.promptFeedback.blockReason}`);
-                        }
-                    }
-                }
+                state.generatedImages = activeModel.provider === 'xai'
+                    ? await generateXaiImages(activeModel, prompt, selectedRatio, imageCount)
+                    : await generateGeminiImages(activeModel, prompt, selectedRatio, imageCount);
 
                 if (state.generatedImages.length > 0) {
                     renderImageGrid();
@@ -1083,6 +1143,101 @@
             renderAnalysisResult();
         }
 
+        function buildImageAnalysisPrompt(instruction) {
+            const basePrompt = `Analyze this image and return valid JSON only. Generate three outputs in English for AI image generation:
+1. shortPrompt: one concise prompt for quick testing
+2. detailedPrompt: one richer production-ready prompt
+3. structuredAnalysis: an object with keys subject, style, composition, lighting, color, mood, camera, keyDetails
+
+Do not include markdown, code fences, or commentary.`;
+
+            return instruction ? `${basePrompt} Additional instruction: ${instruction}` : basePrompt;
+        }
+
+        async function analyzeImageWithGemini(activeModel, analysisPrompt, base64Data, mimeType) {
+            const response = await fetchWithTimeout(
+                buildGeminiApiUrl(activeModel.analysisModel),
+                {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        contents: [{
+                            parts: [
+                                {
+                                    inlineData: {
+                                        mimeType,
+                                        data: base64Data
+                                    }
+                                },
+                                {
+                                    text: analysisPrompt
+                                }
+                            ]
+                        }]
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(await parseApiError(response));
+            }
+
+            const data = await response.json();
+            return data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+        }
+
+        function extractXaiResponseText(data) {
+            if (data.output_text) return data.output_text;
+
+            const outputContent = data.output
+                ?.flatMap(item => item.content || [])
+                ?.find(part => part.text || part.output_text);
+
+            return outputContent?.text || outputContent?.output_text || '';
+        }
+
+        async function analyzeImageWithXai(activeModel, analysisPrompt) {
+            const response = await fetchWithTimeout(
+                'https://api.x.ai/v1/responses',
+                {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${getActiveApiKey()}`
+                    },
+                    body: JSON.stringify({
+                        model: activeModel.analysisModel,
+                        input: [{
+                            role: 'user',
+                            content: [
+                                {
+                                    type: 'input_text',
+                                    text: analysisPrompt
+                                },
+                                {
+                                    type: 'input_image',
+                                    image_url: state.uploadedImage
+                                }
+                            ]
+                        }]
+                    })
+                }
+            );
+
+            if (!response.ok) {
+                throw new Error(await parseApiError(response));
+            }
+
+            const data = await response.json();
+            const responseText = extractXaiResponseText(data);
+
+            if (!responseText) {
+                console.log('[Debug] xAI analysis response:', JSON.stringify(data, null, 2));
+            }
+
+            return responseText;
+        }
+
         async function analyzeImage() {
             const activeModel = getActiveModelConfig();
             const instruction = elements.analysisInstructionInput.value.trim();
@@ -1092,7 +1247,7 @@
                 return;
             }
 
-            if (!state.apiKey) {
+            if (!getActiveApiKey()) {
                 showError('請先設置 API Key');
                 showSettingsModal();
                 return;
@@ -1110,47 +1265,15 @@
                 const base64Data = state.uploadedImage.split(',')[1];
                 const mimeType = state.uploadedImage.split(';')[0].split(':')[1];
 
-                const response = await fetchWithTimeout(
-                    buildApiUrl(activeModel.analysisModel),
-                    {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify({
-                            contents: [{
-                                parts: [
-                                    {
-                                        inlineData: {
-                                            mimeType: mimeType,
-                                            data: base64Data
-                                        }
-                                    },
-                                    {
-                                        text: instruction
-                                            ? `Analyze this image and return valid JSON only. Generate three outputs in English for AI image generation:
-1. shortPrompt: one concise prompt for quick testing
-2. detailedPrompt: one richer production-ready prompt
-3. structuredAnalysis: an object with keys subject, style, composition, lighting, color, mood, camera, keyDetails
-
-Do not include markdown, code fences, or commentary. Additional instruction: ${instruction}`
-                                            : `Analyze this image and return valid JSON only. Generate three outputs in English for AI image generation:
-1. shortPrompt: one concise prompt for quick testing
-2. detailedPrompt: one richer production-ready prompt
-3. structuredAnalysis: an object with keys subject, style, composition, lighting, color, mood, camera, keyDetails
-
-Do not include markdown, code fences, or commentary.`
-                                    }
-                                ]
-                            }]
-                        })
-                    }
-                );
-
-                if (!response.ok) {
-                    throw new Error(await parseApiError(response));
+                if (activeModel.provider === 'xai' && !['image/jpeg', 'image/png'].includes(mimeType)) {
+                    showError('xAI 圖片反推目前僅支援 JPG / PNG，請換一張圖片後重試');
+                    return;
                 }
 
-                const data = await response.json();
-                const responseText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+                const analysisPrompt = buildImageAnalysisPrompt(instruction);
+                const responseText = activeModel.provider === 'xai'
+                    ? await analyzeImageWithXai(activeModel, analysisPrompt)
+                    : await analyzeImageWithGemini(activeModel, analysisPrompt, base64Data, mimeType);
 
                 if (responseText) {
                     const parsedResult = parseAnalysisResponse(responseText);
