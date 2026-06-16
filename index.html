@@ -215,6 +215,21 @@
                         </div>
                     </div>
 
+                    <div id="apiErrorPanel" class="hidden bg-red-950/40 rounded-2xl p-4 border border-red-800/70">
+                        <div class="flex items-center justify-between gap-4 mb-3">
+                            <div>
+                                <p class="text-sm font-medium text-red-100">API 錯誤紀錄</p>
+                                <p class="text-xs text-red-300/80 mt-1">這裡會保留 API 錯誤碼與訊息，方便回頭排查。</p>
+                            </div>
+                            <button id="clearApiErrorLogBtn"
+                                class="px-3 py-2 rounded-lg bg-red-900/80 hover:bg-red-800 text-red-50 text-sm transition-colors border border-red-700">
+                                清除
+                            </button>
+                        </div>
+                        <textarea id="apiErrorLog" rows="5" readonly
+                            class="w-full bg-red-950/70 border border-red-800 rounded-xl px-4 py-3 text-red-50 placeholder-red-300/50 focus:ring-2 focus:ring-red-600 focus:border-transparent outline-none transition resize-none text-xs font-mono leading-relaxed"></textarea>
+                    </div>
+
                     <!-- Tab Navigation -->
                     <div class="flex gap-2">
                         <button id="tabPrompt"
@@ -506,7 +521,8 @@
                 detailedPrompt: '',
                 structuredPrompt: '',
                 activeMode: 'detailed'
-            }
+            },
+            apiErrorLogs: []
         };
 
         // ==================== DOM Elements ====================
@@ -533,6 +549,9 @@
             imageCountSelect: document.getElementById('imageCount'),
             xaiResolutionControl: document.getElementById('xaiResolutionControl'),
             xaiResolutionSelect: document.getElementById('xaiResolution'),
+            apiErrorPanel: document.getElementById('apiErrorPanel'),
+            apiErrorLog: document.getElementById('apiErrorLog'),
+            clearApiErrorLogBtn: document.getElementById('clearApiErrorLogBtn'),
             promptGenerateBtn: document.getElementById('promptGenerateBtn'),
 
             dropZone: document.getElementById('dropZone'),
@@ -592,6 +611,7 @@
             elements.saveSettingsBtn.addEventListener('click', saveSettings);
             elements.modelSelect.addEventListener('change', handleSettingsModelChange);
             elements.xaiResolutionSelect.addEventListener('change', saveXaiResolution);
+            elements.clearApiErrorLogBtn.addEventListener('click', clearApiErrorLog);
             elements.settingsModal.addEventListener('click', (e) => {
                 if (e.target === elements.settingsModal && getActiveApiKey()) {
                     hideSettingsModal();
@@ -740,11 +760,16 @@
             }
 
             const apiMessage = payload?.error?.message;
+            const apiCode = payload?.error?.code || payload?.code;
+            const apiType = payload?.error?.type || payload?.type;
             const promptBlockReason = payload?.promptFeedback?.blockReason;
             const finishReason = payload?.candidates?.[0]?.finishReason;
 
             if (apiMessage) {
-                return `API 錯誤 (${response.status}): ${apiMessage}`;
+                const details = [`HTTP ${response.status}`];
+                if (apiCode) details.push(`code: ${apiCode}`);
+                if (apiType) details.push(`type: ${apiType}`);
+                return `API 錯誤 [${details.join(' / ')}]: ${apiMessage}`;
             }
 
             if (promptBlockReason) {
@@ -1426,9 +1451,39 @@ Do not include markdown, code fences, or commentary.`;
             elements.analyzeBtn.disabled = false;
         }
 
+        function shouldPersistError(message) {
+            return [
+                'API 錯誤',
+                'API 回應',
+                '模型回應',
+                '請求被模型阻擋',
+                '請求逾時',
+                '無法解析 API 回應'
+            ].some(keyword => message.includes(keyword));
+        }
+
+        function appendApiErrorLog(message) {
+            const activeModel = getActiveModelConfig();
+            const timestamp = new Date().toLocaleString('zh-TW', { hour12: false });
+            const logEntry = `[${timestamp}] ${activeModel.label} / ${activeModel.generationModel}\n${message}`;
+
+            state.apiErrorLogs = [logEntry, ...state.apiErrorLogs].slice(0, 10);
+            elements.apiErrorLog.value = state.apiErrorLogs.join('\n\n');
+            elements.apiErrorPanel.classList.remove('hidden');
+        }
+
+        function clearApiErrorLog() {
+            state.apiErrorLogs = [];
+            elements.apiErrorLog.value = '';
+            elements.apiErrorPanel.classList.add('hidden');
+        }
+
         function showError(message) {
             elements.errorMessage.textContent = message;
             elements.errorToast.classList.remove('hidden');
+            if (shouldPersistError(message)) {
+                appendApiErrorLog(message);
+            }
             setTimeout(() => elements.errorToast.classList.add('hidden'), 5000);
         }
 
